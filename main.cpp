@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("AWAH-Sip_Codec");
 
     AWAHSipLib::prepareLib();
-    AWAHSipLib Lib(nullptr);
+    AWAHSipLib::instance(&a);
 
     return a.exec();
 }
