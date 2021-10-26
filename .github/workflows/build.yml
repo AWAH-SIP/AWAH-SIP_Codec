@@ -75,10 +75,10 @@ jobs:
         run: cd build && qmake ../AWAH-SIP_Codec.pro
         
       - name: Make
-        run:  cd build && make && ls -l && mv AWAH-SIP_Codec.app AWAH-SIP_Codec_${{ github.sha }}.app
+        run:  cd build && make && mv AWAH-SIP_Codec AWAH-SIP_Codec_${{ github.sha }}
         
       - name: MacDeployQT
-        run:  cd build && macdeployqt AWAH-SIP_Codec_${{ github.sha }}.app -dmg
+        run:  cd build && macdeployqt AWAH-SIP_Codec_${{ github.sha }} -dmg
         
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.2.4
