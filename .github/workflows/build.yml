@@ -1,0 +1,148 @@
+name: Build Desktop GUI
+on: [push]
+jobs:
+  Linux:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-QtCache
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: "5.15.2"
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+
+      - name: Check out repository code
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+        
+      - name: Install fancy dependencys
+        run:  sudo apt install desktop-file-utils libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-composite0 libxcb-cursor0 libxcb-damage0 libxcb-dpms0 libxcb-dri2-0 libxcb-dri3-0 libxcb-ewmh2 libxcb-glx0 libxcb-present0 libxcb-randr0 libxcb-record0 libxcb-render0 libxcb-res0 libxcb-screensaver0 libxcb-shape0 libxcb-shm0 libxcb-sync1 libxcb-util1
+
+      - name: QMake
+        run: mkdir build && cd build && qmake CONFIG+=release PREFIX=/usr ../AWAH-SIP_Codec.pro
+        
+      - name: Make
+        run:  cd build && make -j$(nproc)
+        
+      - name: MakeInstall
+        run:  cd build && make INSTALL_ROOT=appdir -j$(nproc) install
+        
+      - name: LinuxDeployQT
+        run:  |
+          cd build && wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+          chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+          ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -appimage -verbose=2
+          
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          name: AWAH-SIP_Desktop-GUI_${{ github.sha }}-x86_64.AppImage
+          path: build/AWAH-SIP_Codec-*-x86_64.AppImage
+  
+  MacOS:
+    runs-on: macos-latest
+    steps:
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-QtCache
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: "5.15.2"
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+
+      - name: Check out repository code
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+        
+      - run:  mkdir build
+
+      - name: QMake
+        run: cd build && qmake ../AWAH-SIP_Codec.pro
+        
+      - name: Make
+        run:  cd build && make && mv AWAH-SIP_Codec.app AWAH-SIP_Codec_${{ github.sha }}.app
+        
+      - name: MacDeployQT
+        run:  cd build && macdeployqt AWAH-SIP_Codec_${{ github.sha }}.app -dmg
+        
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          name: AWAH-SIP_Desktop-GUI_${{ github.sha }}.dmg
+          path: build/AWAH-SIP_Codec_*.dmg
+        
+  Windows:
+    runs-on: windows-latest
+    steps:
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-QtCache
+          
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: "5.15.2"
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          
+      - name: get openssl
+        run: Invoke-WebRequest -Uri "https://mirror.firedaemon.com/OpenSSL/openssl-1.1.1l-dev.zip" -OutFile ".\openssl.zip"
+        shell: powershell
+      - name: expand openssl
+        run: |
+          Expand-Archive -LiteralPath .\openssl.zip -DestinationPath .\openssl_build\; pwd
+          cd openssl_build\openssl-1.1\x86
+          Add-Content ..\..\..\openssl_dir.txt $pwd.Path
+        shell: powershell
+        
+      - name: check openssl folder
+        run: |
+          set /P OPENSSL_DIR=<openssl_dir.txt
+          dir "%OPENSSL_DIR%\include"
+          dir "%OPENSSL_DIR%\lib"
+
+      - name: Check out repository code
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - name: QMake && Make
+        run: |
+          set /P OPENSSL_DIR=<openssl_dir.txt
+          call "%PROGRAMFILES(x86)%\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"
+          set INCLUDE=%INCLUDE%;%OPENSSL_DIR%\include;%cd%\..\win_x86-64\opus-1.3.1\include
+          set LIB=%LIB%;%OPENSSL_DIR%\lib;%cd%\..\win_x86-64\opus-1.3.1\win32\VS2015\x64\Release
+          qmake AWAH-SIP_Codec.pro
+          nmake
+        
+      - name: WinDeployQT
+        run:  md deploy && copy release\AWAH-SIP_Codec.exe deploy\ && windeployqt --release --no-translations --compiler-runtime deploy\AWAH-SIP_Codec.exe
+        
+      - name: Easy Zip Files
+        uses: vimtor/action-zip@v1
+        with:
+          files: deploy
+          dest: AWAH-SIP_Codec-${{ github.sha }}.zip
+          
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          name: AWAH-SIP_Codec-${{ github.sha }}.zip
+          path: AWAH-SIP_Codec-*.zip
