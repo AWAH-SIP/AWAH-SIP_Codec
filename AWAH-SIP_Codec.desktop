@@ -3,5 +3,6 @@ Type=Application
 Name=AWAH-SIP Codec
 Comment=AWAH-SIP Codec - the open Broadcast SIP Codec
 Exec=AWAH-SIP_Codec
+Icon=AWAH_logo_sm
 Terminal=true
 Categories=Network;Audio;
