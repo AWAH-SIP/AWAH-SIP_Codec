@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=AWAH-SIP Codec
+Comment=AWAH-SIP Codec - the open Broadcast SIP Codec
+Exec=AWAH-SIP_Codec
+Terminal=true
+Categories=Network;Audio;
