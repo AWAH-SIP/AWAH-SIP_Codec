@@ -12,7 +12,18 @@ SOURCES += \
 
 include(awah-sip_library/awahsiplib.pri)
 
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
+RC_ICONS = images/AWAH_logo_sm.ico
+
+linux-g++ {
+    isEmpty(PREFIX) {
+        PREFIX = /usr
+    }
+    target.path = $$PREFIX/bin
+
+    desktop.path = $$PREFIX/share/applications/
+    desktop.files += AWAH-SIP_Codec.desktop
+    icon40.path = $$PREFIX/share/icons/hicolor/40x40/apps
+    icon40.files += images/AWAH_logo_sm.png
+
+    INSTALLS += icon40 desktop target
+}
