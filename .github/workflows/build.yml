@@ -115,7 +115,7 @@ jobs:
       - name: expand openssl
         run: |
           Expand-Archive -LiteralPath .\openssl.zip -DestinationPath .\openssl_build\; pwd
-          cd openssl_build\openssl-1.1\x86
+          cd openssl_build\openssl-1.1\x64
           Add-Content ..\..\..\openssl_dir.txt $pwd.Path
         shell: powershell
         
