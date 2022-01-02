@@ -1,4 +1,4 @@
-name: Build Desktop GUI
+name: Build AWAH-SIP Codec
 on: [push]
 jobs:
   Linux:
