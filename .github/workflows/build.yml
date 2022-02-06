@@ -61,8 +61,8 @@ jobs:
         with:
           version: "5.15.2"
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
-      - name: Install Opencore
-        run: brew install opencore-amr
+      - name: Install Opencore & OpenSSL
+        run: brew install opencore-amr openssl@1.1
 
       - name: Check out repository code
         uses: actions/checkout@v2
@@ -110,7 +110,7 @@ jobs:
           submodules: 'recursive'
       
       - name: get openssl
-        run: Invoke-WebRequest -Uri "https://mirror.firedaemon.com/OpenSSL/openssl-1.1.1l-dev.zip" -OutFile ".\openssl.zip"
+        run: Invoke-WebRequest -Uri "https://mirror.firedaemon.com/OpenSSL/openssl-1.1.1l.zip" -OutFile ".\openssl.zip"
         shell: powershell
       - name: expand openssl
         run: |
