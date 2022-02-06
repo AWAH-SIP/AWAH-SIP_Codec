@@ -102,6 +102,7 @@ jobs:
         uses: jurplel/install-qt-action@v2
         with:
           version: "5.15.2"
+          arch: "win32_msvc2015"
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
         
       - name: Check out repository code
@@ -113,12 +114,11 @@ jobs:
         run: dir "%PROGRAMFILES(x86)%\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"
         shell: cmd
 
-      - name: QMake && Make
-        run: |
-          call "%PROGRAMFILES(x86)%\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"
-          qmake AWAH-SIP_Codec.pro -spec win32-msvc
-          nmake
-        shell: cmd
+      - name: QMake
+        run: qmake AWAH-SIP_Codec.pro -spec win32-msvc
+        
+      - name: Make
+        run:  nmake
         
       - name: WinDeployQT
         run:  md deploy && copy release\AWAH-SIP_Codec.exe deploy\ && windeployqt --release --no-translations --compiler-runtime deploy\AWAH-SIP_Codec.exe
