@@ -115,7 +115,7 @@ jobs:
       - name: QMake & Make
         run: |
           call "%PROGRAMFILES(x86)%\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"
-          Qt\5.15.2\msvc2019\bin\qmake.exe AWAH-SIP_Codec.pro -spec win32-msvc
+          ..\Qt\5.15.2\msvc2019\bin\qmake.exe AWAH-SIP_Codec.pro -spec win32-msvc
           nmake
         shell: cmd
         
