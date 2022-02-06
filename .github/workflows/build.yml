@@ -95,8 +95,6 @@ jobs:
         with:
           path: ../Qt
           key: ${{ runner.os }}-QtCache
-          
-      - uses: ilammy/msvc-dev-cmd@v1
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
@@ -114,11 +112,12 @@ jobs:
         run: dir "%PROGRAMFILES(x86)%\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"
         shell: cmd
 
-      - name: QMake
-        run: qmake AWAH-SIP_Codec.pro -spec win32-msvc
-        
-      - name: Make
-        run:  nmake
+      - name: QMake & Make
+        run: |
+          call "%PROGRAMFILES(x86)%\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"
+          Qt\5.15.2\msvc2019\bin\qmake.exe AWAH-SIP_Codec.pro -spec win32-msvc
+          nmake
+        shell: cmd
         
       - name: WinDeployQT
         run:  md deploy && copy release\AWAH-SIP_Codec.exe deploy\ && windeployqt --release --no-translations --compiler-runtime deploy\AWAH-SIP_Codec.exe
