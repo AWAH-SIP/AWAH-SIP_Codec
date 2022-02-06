@@ -1,5 +1,7 @@
 # AWAH-SIP the open broadcast codec
 
+[![Build AWAH-SIP Codec](https://github.com/AWAH-SIP/AWAH-SIP_Codec/actions/workflows/build.yml/badge.svg)](https://github.com/AWAH-SIP/AWAH-SIP_Codec/actions/workflows/build.yml)
+
 The AWAH-SIP Codec is an open SIP client tailored for the needs of a broadcast facility. The project is based on PJSUA and QT. EBU TECH 3326 is considered a lot to try to reach the best interopability with existing products.
 
 The codec can handle multiple SIP accounts and has an integrated routing matrix witch is capable of routing an summing the various audio signals coming from the local audio interfaces.
