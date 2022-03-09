@@ -28,3 +28,6 @@ linux-g++ {
 
     INSTALLS += icon40 desktop target
 }
+
+target.path = /opt/AWAH-SIP_Codec/bin
+INSTALLS += target
