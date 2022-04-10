@@ -29,5 +29,10 @@ linux-g++ {
     INSTALLS += icon40 desktop target
 }
 
-target.path = /opt/AWAH-SIP_Codec/bin
-INSTALLS += target
+linux-rasp-pi4-v3d-g++ {
+    message("building for raspi, adding target path")
+    target.path = /opt/AWAH-SIP_Codec/bin
+    INSTALLS += target
+}
+
+
