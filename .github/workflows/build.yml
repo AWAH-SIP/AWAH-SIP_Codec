@@ -43,7 +43,7 @@ jobs:
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.2.4
         with:
-          name: AWAH-SIP_Desktop-GUI_${{ github.sha }}-x86_64.AppImage
+          name: AWAH-SIP_Codec_${{ github.sha }}-x86_64.AppImage
           path: build/AWAH-SIP_Codec-*-x86_64.AppImage
   
   MacOS:
@@ -75,15 +75,15 @@ jobs:
         run: cd build && qmake ../AWAH-SIP_Codec.pro
         
       - name: Make
-        run:  cd build && make && mv AWAH-SIP_Codec AWAH-SIP_Codec_${{ github.sha }}
+        run:  cd build && make && mv AWAH-SIP_Codec AWAH-SIP_Codec_${{ github.sha }}.app
         
       - name: MacDeployQT
-        run:  cd build && macdeployqt AWAH-SIP_Codec_${{ github.sha }} -dmg
+        run:  cd build && macdeployqt AWAH-SIP_Codec_${{ github.sha }}.app -dmg
         
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.2.4
         with:
-          name: AWAH-SIP_Desktop-GUI_${{ github.sha }}.dmg
+          name: AWAH-SIP_Codec_${{ github.sha }}.dmg
           path: build/AWAH-SIP_Codec_*.dmg
         
   Windows:
