@@ -4,18 +4,10 @@ jobs:
   Linux:
     runs-on: ubuntu-18.04
     steps:
-      - name: Cache Qt
-        id: cache-qt
-        uses: actions/cache@v1
-        with:
-          path: ../Qt
-          key: ${{ runner.os }}-QtCache
-
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v3
         with:
           version: "5.15.2"
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
       - name: Check out repository code
         uses: actions/checkout@v2
@@ -49,18 +41,11 @@ jobs:
   MacOS:
     runs-on: macos-latest
     steps:
-      - name: Cache Qt
-        id: cache-qt
-        uses: actions/cache@v1
-        with:
-          path: ../Qt
-          key: ${{ runner.os }}-QtCache
-
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v3
         with:
           version: "5.15.2"
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+
       - name: Install Opencore & OpenSSL
         run: brew install opencore-amr openssl@1.1
 
@@ -89,19 +74,11 @@ jobs:
   Windows:
     runs-on: windows-2019
     steps:
-      - name: Cache Qt
-        id: cache-qt
-        uses: actions/cache@v1
-        with:
-          path: ../Qt
-          key: ${{ runner.os }}-QtCache
-
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v3
         with:
           version: "5.15.2"
           arch: "win32_msvc2019"
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
         
       - name: Check out repository code
         uses: actions/checkout@v2
