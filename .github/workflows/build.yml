@@ -2,7 +2,7 @@ name: Build AWAH-SIP Codec
 on: [push]
 jobs:
   Linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
