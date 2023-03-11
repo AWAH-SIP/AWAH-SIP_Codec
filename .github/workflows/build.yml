@@ -27,7 +27,7 @@ jobs:
         run:  cd build && make -j$(nproc)
         
       - name: MakeInstall
-        run:  cd build && make INSTALL_ROOT=appdir -j$(nproc) install
+        run:  cd build && make INSTALL_ROOT=appdir -j$(nproc) install && cp AWAH-SIP_Codec usr/bin/AWAH-SIP_Codec
         
       - name: Build AppImage
         uses: AppImageCrafters/build-appimage-action@master
