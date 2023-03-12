@@ -1,6 +1,6 @@
 version: 1
 AppDir:
-  path: ./appdir
+  path: ./AppDir
   app_info:
     id: AWAH-SIP_Codec
     name: AWAH-SIP_Codec
@@ -79,19 +79,9 @@ AppDir:
     - qml-module-qtquick-window2
     - qml-module-qtquick2
     exclude:
-      - hicolor-icon-theme
-      - sound-theme-freedesktop
-      - perl
-      - perl-base
-      - kwayland-data
-      - libwacom2
-      - libasound2
-      - breeze
-      - breeze-icon-theme
-      - breeze-cursor-theme
-      - kwin-style-breeze
-      - kde-style-breeze
-      - plasma-integration
+    - phonon4qt5
+    - libkf5service-bin
+    - libpam-runtime
   files:
     exclude:
     - usr/share/man
