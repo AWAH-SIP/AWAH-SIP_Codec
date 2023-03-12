@@ -1,12 +1,12 @@
 version: 1
 AppDir:
-  path: appdir
+  path: ./appdir
   app_info:
     id: AWAH-SIP_Codec
     name: AWAH-SIP_Codec
     icon: AWAH-SIP_Codec
     version: latest
-    exec: appdir/usr/bin/AWAH-SIP_Codec
+    exec: usr/bin/AWAH-SIP_Codec
     exec_args: $@
   apt:
     arch: amd64
@@ -38,7 +38,7 @@ AppDir:
     - libkf5globalaccel5
     - libkf5guiaddons5
     - libkf5i18n5
-    - libkf5iconthemes5
+    - libkf5iconthemes5 
     - libkf5itemviews5
     - libkf5jobwidgets5
     - libkf5kiocore5
