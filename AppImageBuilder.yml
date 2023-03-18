@@ -78,10 +78,19 @@ AppDir:
     - qml-module-qtquick-templates2
     - qml-module-qtquick-window2
     - qml-module-qtquick2
-    exclude:
-    - phonon4qt5
-    - libkf5service-bin
-    - libpam-runtime
+   exclude:
+      - hicolor-icon-theme
+      - sound-theme-freedesktop
+      - perl
+      - perl-base
+      - kwayland-data
+      - libwacom2
+      - breeze
+      - breeze-icon-theme
+      - breeze-cursor-theme
+      - kwin-style-breeze
+      - kde-style-breeze
+      - plasma-integration
   files:
     exclude:
     - usr/share/man
@@ -90,9 +99,6 @@ AppDir:
     - usr/share/doc/*/NEWS.*
     - usr/share/doc/*/TODO.*
   
-  runtime:
-    env:
-      APPDIR_LIBRARY_PATH: $APPDIR/usr/lib:$APPDIR/usr/lib/../lib
 
   test:
     fedora:
