@@ -1,6 +1,6 @@
 version: 1
 AppDir:
-  path: AppDir
+  path: build/AppDir
   app_info:
     id: AWAH-SIP_Codec
     name: AWAH-SIP_Codec
@@ -92,7 +92,7 @@ AppDir:
   
   runtime:
     env:
-      APPDIR_LIBRARY_PATH: $APPDIR/usr/lib:$APPDIR/usr/lib/../lib:/home/runner/work/AWAH-SIP_Codec/AWAH-SIP_Codec/build/AppDir/usr/bin/
+      APPDIR_LIBRARY_PATH: $APPDIR/usr/lib:$APPDIR/usr/lib/../lib
 
   test:
     fedora:
