@@ -4,7 +4,7 @@ AppDir:
   app_info:
     id: AWAH-SIP_Codec
     name: AWAH-SIP_Codec
-    icon: AWAH_logo_sm.png
+    icon: AWAH_logo_sm
     version: latest
     exec: usr/bin/AWAH-SIP_Codec
     exec_args: $@
@@ -78,19 +78,7 @@ AppDir:
     - qml-module-qtquick-templates2
     - qml-module-qtquick-window2
     - qml-module-qtquick2
-    exclude:
-    - hicolor-icon-theme
-    - sound-theme-freedesktop
-    - perl
-    - perl-base
-    - kwayland-data
-    - libwacom2
-    - breeze
-    - breeze-icon-theme
-    - breeze-cursor-theme
-    - kwin-style-breeze
-    - kde-style-breeze
-    - plasma-integration
+   
   files:
     exclude:
     - usr/share/man
