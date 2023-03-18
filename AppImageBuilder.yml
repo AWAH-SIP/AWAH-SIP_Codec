@@ -6,7 +6,7 @@ AppDir:
     name: AWAH-SIP_Codec
     icon: AWAH-SIP_Codec
     version: latest
-    exec:   usr/bin/AWAH-SIP_Codec
+    exec:   /home/runner/work/AWAH-SIP_Codec/AWAH-SIP_Codec/build/AppDir/usr/bin/AWAH-SIP_Codec
     exec_args: $@
   apt:
     arch: amd64
