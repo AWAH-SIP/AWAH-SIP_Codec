@@ -4,7 +4,7 @@ AppDir:
   app_info:
     id: AWAH-SIP_Codec
     name: AWAH-SIP_Codec
-    icon: AWAH_logo_sm.ico
+    icon: AWAH_logo_sm.png
     version: latest
     exec:   usr/bin/AWAH-SIP_Codec
     exec_args: $@
