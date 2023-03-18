@@ -30,7 +30,7 @@ jobs:
         run:  cd build && make INSTALL_ROOT=AppDir -j$(nproc) install 
       
       - name: Prepare AppImage
-        run: cp -r /home/runner/work/AWAH-SIP_Codec/AWAH-SIP_Codec/build/AppDir /home/runner/work/AWAH-SIP_Codec/AWAH-SIP_Codec/AppDir && cp /home/runner/work/AWAH-SIP_Codec/AWAH-SIP_Codec/images/AWAH_logo_sm.ico /home/runner/work/AWAH-SIP_Codec/AWAH-SIP_Codec/AppDir/AWAH_logo_sm.ico
+        run: cp -r /home/runner/work/AWAH-SIP_Codec/AWAH-SIP_Codec/build/AppDir /home/runner/work/AWAH-SIP_Codec/AWAH-SIP_Codec/AppDir && cp /home/runner/work/AWAH-SIP_Codec/AWAH-SIP_Codec/images/AWAH_logo_sm.png /home/runner/work/AWAH-SIP_Codec/AWAH-SIP_Codec/AppDir/AWAH_logo_sm.png
         
       - name: Build AppImage
         uses: AppImageCrafters/build-appimage-action@master
