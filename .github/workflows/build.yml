@@ -3,7 +3,7 @@ on: [push]
 jobs:
   Linux:
     runs-on: ubuntu-22.04
-     steps: 
+    steps: 
       - name: Build AppImage
         uses: AppImageCrafters/build-appimage-action@master
         
