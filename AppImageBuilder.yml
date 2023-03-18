@@ -78,7 +78,8 @@ AppDir:
     - qml-module-qtquick-templates2
     - qml-module-qtquick-window2
     - qml-module-qtquick2
-    - libsquashfs
+    - libsquashfs-dev
+   
    
   files:
     exclude:
