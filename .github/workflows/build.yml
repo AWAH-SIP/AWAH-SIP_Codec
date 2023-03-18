@@ -27,7 +27,7 @@ jobs:
         run:  cd build && make -j$(nproc)
         
       - name: MakeInstall
-        run:  cd build && make INSTALL_ROOT=AppDir -j$(nproc) install && pwd && ls -la && cd AppDir && mv -v AppDir/ .. && cd .. && ls -la
+        run:  cd build && make INSTALL_ROOT=AppDir -j$(nproc) install && pwd && ls -la && cd AppDir && mv -v AppDir .. && cd .. && ls -la
         
       - name: Build AppImage
         uses: AppImageCrafters/build-appimage-action@master
