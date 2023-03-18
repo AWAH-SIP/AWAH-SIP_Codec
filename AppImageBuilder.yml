@@ -99,6 +99,9 @@ AppDir:
     - usr/share/doc/*/NEWS.*
     - usr/share/doc/*/TODO.*
   
+  runtime:
+    env:
+      APPDIR_LIBRARY_PATH: $APPDIR/usr/lib:$APPDIR/usr/lib/../lib
 
   test:
     fedora:
