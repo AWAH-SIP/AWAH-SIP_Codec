@@ -32,4 +32,4 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            ghcr.io/AWAH-SIP/AWAH-LinuxBuild:latest
+            ghcr.io/awah-sip/awah-linux-build:latest
