@@ -4,40 +4,18 @@ jobs:
   Linux:
     runs-on: ubuntu-22.04
     steps:
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v3
-        with:
-          version: "5.15.2"
-
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
           submodules: 'recursive'
         
-      - name: Install fancy dependencies
-        run:  sudo apt install fuse libfuse2 desktop-file-utils libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-composite0 libxcb-cursor0 libxcb-damage0 libxcb-dpms0 libxcb-dri2-0 libxcb-dri3-0 libxcb-ewmh2 libxcb-glx0 libxcb-present0 libxcb-randr0 libxcb-record0 libxcb-render0 libxcb-res0 libxcb-screensaver0 libxcb-shape0 libxcb-shm0 libxcb-sync1 libxcb-util1 uuid-dev libopencore-amrwb-dev libopencore-amrnb-dev libopus-dev libasound2-dev libssl-dev
-        
-      - name: Install SSL 1.1.1
-        run:  wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl-dev_1.1.1f-1ubuntu2.17_amd64.deb && sudo dpkg -i libssl-dev_1.1.1f-1ubuntu2.17_amd64.deb 
-
-      - name: QMake
-        run: mkdir build && cd build && qmake CONFIG+=release PREFIX=/usr ../AWAH-SIP_Codec.pro
-        
-      - name: Make
-        run:  cd build && make -j$(nproc)
-        
-      - name: MakeInstall
-        run:  cd build && make INSTALL_ROOT=AppDir -j$(nproc) install 
-      
-      - name: Prepare AppImage
-        run: cp -r /home/runner/work/AWAH-SIP_Codec/AWAH-SIP_Codec/build/AppDir /home/runner/work/AWAH-SIP_Codec/AWAH-SIP_Codec/AppDir && cp /home/runner/work/AWAH-SIP_Codec/AWAH-SIP_Codec/images/AWAH_logo_sm.png /home/runner/work/AWAH-SIP_Codec/AWAH-SIP_Codec/AppDir/AWAH_logo_sm
-        
-      - name: Build AppImage
-        uses: AppImageCrafters/build-appimage-action@master
-        env:
-          UPDATE_INFO: gh-releases-zsync|AWAH-SIP|AWAH-SIP_Codec|latest|*x86_64.AppImage.zsync
+      - name: Build AppImage in Docker
+        uses: addnab/docker-run-action@v3
         with:
-          recipe: AppImageBuilder.yml
+          registry: ghcr.io
+          image: ghcr.io/awah-sip/awah-linux-build:latest
+          options: -v ${{ github.workspace }}:/home/root
+          run: ./docker_build/build_AppImage_with_Container.sh
           
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v3
