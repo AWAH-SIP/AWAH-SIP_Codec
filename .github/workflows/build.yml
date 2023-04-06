@@ -14,7 +14,7 @@ jobs:
         with:
           registry: ghcr.io
           image: ghcr.io/awah-sip/awah-linux-build:latest
-          options: -v ${{ github.workspace }}:/home/root
+          options: -v ${{ github.workspace }}:/home/root --privileged
           run: ./docker_build/build_AppImage_with_Container.sh
           
       - name: Upload a Build Artifact
