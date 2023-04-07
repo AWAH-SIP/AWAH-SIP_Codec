@@ -17,6 +17,9 @@ jobs:
           options: -v ${{ github.workspace }}:/home/root --privileged
           run: ./docker_build/build_AppImage_with_Container.sh
           
+      - name: Rename AppImage
+        run: mv build/AWAH-SIP_Codec-x86_64.AppImage build/AWAH-SIP_Codec-${{ github.sha }}-x86_64.AppImage
+        
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v3
         with:
