@@ -36,6 +36,9 @@ jobs:
 
       - name: Install Opencore & OpenSSL
         run: brew install opencore-amr openssl@1.1
+        
+      - name: Install Opus
+        run: brew install opus
 
       - name: Check out repository code
         uses: actions/checkout@v3
