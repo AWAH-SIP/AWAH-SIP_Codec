@@ -3,7 +3,7 @@ FROM ubuntu:16.04 as builder
 WORKDIR /root
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y software-properties-common build-essential checkinstall zlib1g-dev wget fuse libfuse2 desktop-file-utils libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-composite0 libxcb-cursor0 libxcb-damage0 libxcb-dpms0 libxcb-dri2-0 libxcb-dri3-0 libxcb-ewmh2 libxcb-glx0 libxcb-present0 libxcb-randr0 libxcb-record0 libxcb-render0 libxcb-res0 libxcb-screensaver0 libxcb-shape0 libxcb-shm0 libxcb-sync1 libxcb-util1 uuid-dev libopencore-amrwb-dev libopencore-amrnb-dev libopus-dev libasound2-dev
+RUN apt-get update && apt-get install -y software-properties-common build-essential checkinstall zlib1g-dev wget fuse libfuse2 desktop-file-utils libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-composite0 libxcb-cursor0 libxcb-damage0 libxcb-dpms0 libxcb-dri2-0 libxcb-dri3-0 libxcb-ewmh2 libxcb-glx0 libxcb-present0 libxcb-randr0 libxcb-record0 libxcb-render0 libxcb-res0 libxcb-screensaver0 libxcb-shape0 libxcb-shm0 libxcb-sync1 libxcb-util1 uuid-dev libopencore-amrwb-dev libopencore-amrnb-dev libopus-dev libasound2-dev libssl-dev
 
 RUN cd /usr/local/src/ && wget https://www.openssl.org/source/openssl-1.1.1f.tar.gz && tar -xf openssl-1.1.1f.tar.gz && cd openssl-1.1.1f && ./config --prefix=/usr/local/ssl --openssldir=/usr/local/ssl shared zlib && make && make install && echo "/usr/local/ssl/lib" >> /etc/ld.so.conf.d/openssl-1.1.1f.conf && ldconfig -v 
 
