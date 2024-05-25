@@ -33,7 +33,10 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           version: "5.15.2"
-
+      
+      - name: Switch macOS Xcode version with older Qt versions
+        run: sudo xcode-select --switch /Applications/Xcode_14.3.1.app
+        
       - name: Install Opencore & OpenSSL
         run: brew install opencore-amr openssl@1.1
 
