@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: 'recursive'
         
@@ -21,7 +21,7 @@ jobs:
         run: sudo mv build/AWAH-SIP_Codec-x86_64.AppImage build/AWAH-SIP_Codec-${{ github.sha }}-x86_64.AppImage
         
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: AWAH-SIP_Codec_${{ github.sha }}-x86_64.AppImage
           path: build/AWAH-SIP_Codec-*-x86_64.AppImage
@@ -30,7 +30,7 @@ jobs:
     runs-on: macos-latest 
     steps:
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           version: "5.15.2"
 
@@ -38,7 +38,7 @@ jobs:
         run: brew install opencore-amr openssl@1.1
 
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: 'recursive'
         
@@ -54,7 +54,7 @@ jobs:
         run:  cd build && macdeployqt AWAH-SIP_Codec_${{ github.sha }}.app -dmg
         
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: AWAH-SIP_Codec_${{ github.sha }}.dmg
           path: build/AWAH-SIP_Codec_*.dmg
@@ -63,13 +63,13 @@ jobs:
     runs-on: windows-2019
     steps:
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           version: "5.15.2"
           arch: "win32_msvc2019"
         
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: 'recursive'
       
@@ -94,7 +94,7 @@ jobs:
           dest: AWAH-SIP_Codec-${{ github.sha }}.zip
           
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: AWAH-SIP_Codec-${{ github.sha }}.zip
           path: AWAH-SIP_Codec-*.zip
