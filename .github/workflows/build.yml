@@ -27,7 +27,7 @@ jobs:
           path: build/AWAH-SIP_Codec-*-x86_64.AppImage
   
   MacOS:
-    runs-on: macos-latest 
+    runs-on: macos-13
     steps:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
