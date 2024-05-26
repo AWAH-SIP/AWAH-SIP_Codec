@@ -2,55 +2,46 @@ name: Build AWAH-SIP Codec
 on: [push]
 jobs:
   Linux:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v3
-        with:
-          version: "5.15.2"
-
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: 'recursive'
         
-      - name: Install fancy dependencys
-        run:  sudo apt install desktop-file-utils libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-composite0 libxcb-cursor0 libxcb-damage0 libxcb-dpms0 libxcb-dri2-0 libxcb-dri3-0 libxcb-ewmh2 libxcb-glx0 libxcb-present0 libxcb-randr0 libxcb-record0 libxcb-render0 libxcb-res0 libxcb-screensaver0 libxcb-shape0 libxcb-shm0 libxcb-sync1 libxcb-util1 uuid-dev libopencore-amrwb-dev libopencore-amrnb-dev libopus-dev libasound2-dev
-
-      - name: QMake
-        run: mkdir build && cd build && qmake CONFIG+=release PREFIX=/usr ../AWAH-SIP_Codec.pro
-        
-      - name: Make
-        run:  cd build && make -j$(nproc)
-        
-      - name: MakeInstall
-        run:  cd build && make INSTALL_ROOT=appdir -j$(nproc) install
-        
-      - name: LinuxDeployQT
-        run:  |
-          cd build && wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
-          chmod a+x linuxdeployqt-continuous-x86_64.AppImage
-          ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -appimage -verbose=2
+      - name: Build AppImage in Docker
+        uses: addnab/docker-run-action@v3
+        with:
+          registry: ghcr.io
+          image: ghcr.io/awah-sip/awah-linux-build:latest
+          options: -v ${{ github.workspace }}:/home/root --privileged
+          run: ./docker_build/build_AppImage_with_Container.sh
           
+      - name: Rename AppImage
+        run: sudo mv build/AWAH-SIP_Codec-x86_64.AppImage build/AWAH-SIP_Codec-${{ github.sha }}-x86_64.AppImage
+        
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: AWAH-SIP_Codec_${{ github.sha }}-x86_64.AppImage
           path: build/AWAH-SIP_Codec-*-x86_64.AppImage
   
   MacOS:
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           version: "5.15.2"
-
+      
+      - name: Switch macOS Xcode version with older Qt versions
+        run: sudo xcode-select --switch /Applications/Xcode_14.3.1.app
+        
       - name: Install Opencore & OpenSSL
         run: brew install opencore-amr openssl@1.1
 
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: 'recursive'
         
@@ -66,7 +57,7 @@ jobs:
         run:  cd build && macdeployqt AWAH-SIP_Codec_${{ github.sha }}.app -dmg
         
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: AWAH-SIP_Codec_${{ github.sha }}.dmg
           path: build/AWAH-SIP_Codec_*.dmg
@@ -75,13 +66,13 @@ jobs:
     runs-on: windows-2019
     steps:
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           version: "5.15.2"
           arch: "win32_msvc2019"
         
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: 'recursive'
       
@@ -106,7 +97,7 @@ jobs:
           dest: AWAH-SIP_Codec-${{ github.sha }}.zip
           
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: AWAH-SIP_Codec-${{ github.sha }}.zip
           path: AWAH-SIP_Codec-*.zip
