@@ -101,3 +101,31 @@ jobs:
         with:
           name: AWAH-SIP_Codec-${{ github.sha }}.zip
           path: AWAH-SIP_Codec-*.zip
+
+  RaspberryPi:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+      
+      - name: make build directory
+        run: sudo mkdir build
+
+      - name: Build AppImage in Docker
+        uses: addnab/docker-run-action@v3
+        with:
+          registry: ghcr.io
+          image: ghcr.io/awah-sip/awah-rpi-build:latest
+          options: -v ${{ github.workspace }}:/var/src -v ${{ github.workspace }}/build:/var/build --privileged
+          run: build "DEFINES+=AWAH_libgpiod"
+          
+      - name: Rename AppImage
+        run:  ls build/ && sudo mv build/AWAH-SIP_Codec build/AWAH-SIP_Codec-RPi-${{ github.sha }}
+        
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AWAH-SIP_Codec-RPi-${{ github.sha }}
+          path: build/AWAH-SIP_Codec-RPi-*
