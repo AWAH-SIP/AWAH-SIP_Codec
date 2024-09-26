@@ -1,0 +1,278 @@
+FROM --platform=linux/arm/v7 balenalib/rpi-raspbian:bookworm as raspi
+
+LABEL maintainer="AWAH-SIP@users.noreply.github.com"
+LABEL stage=qt-raspberry-base
+
+# UID/GID injection on build if wanted
+ARG USER_UID=
+ARG USER_GID=
+
+# In case you have to build behind a proxy
+ARG PROXY=
+ENV http_proxy=$PROXY
+ENV https_proxy=$PROXY
+
+# Name of the regular user. Does not look useful but can save a bit time when changing
+ENV QT_USERNAME=qt
+
+# Needed in both builder and qt stages, so has to be defined here
+ENV QT_PREFIX=/usr/local
+
+# Install all build dependencies
+RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recommends install \
+	ca-certificates \
+	# sudo to be able to modify the container as the user, if needed.
+	sudo \
+	curl \
+	python3 \
+	gperf \
+	bison \
+	flex \
+	build-essential \
+	pkg-config \
+	libgl1-mesa-dev \
+	libegl1-mesa-dev \
+	libgles2-mesa-dev \
+	libicu-dev \
+	firebird-dev \
+	libpq-dev \
+    cmake \
+	# bc suggested for openssl tests
+	bc \
+	libssl-dev \
+	# git is needed to build openssl in older versions
+	git \
+	# bash needed for argument substitution in entrypoint
+	bash \
+	# since 5.14.0 we apparently need libdbus-1-dev and libnss3-dev
+	libnss3-dev \
+	libdbus-1-dev \
+    libasound2-dev \
+    alsa-utils \
+    alsa-tools \
+    alsa-base \
+    libopus-dev \
+	libopencore-amrwb-dev \
+	libopencore-amrnb-dev \
+	uuid uuid-dev \
+	libgpiod-dev \
+	&& apt-get -qq clean \
+	&& rm -rf /var/lib/apt/lists/* \
+	&& printf "#!/bin/sh\nls -lah" > /usr/local/bin/ll && chmod +x /usr/local/bin/ll
+
+# Adding regular user
+RUN if [ ${USER_GID} ]; then \
+	addgroup -g ${USER_GID} ${QT_USERNAME}; \
+	else \
+	addgroup ${QT_USERNAME}; \
+	fi \
+	&& if [ ${USER_UID} ]; then \
+	useradd -u ${USER_UID} -g ${QT_USERNAME} ${QT_USERNAME}; \
+	else \
+	useradd -g ${QT_USERNAME} ${QT_USERNAME}; \
+	fi && mkdir /home/${QT_USERNAME}
+
+# make sure the user is able to sudo if needed
+RUN adduser ${QT_USERNAME} sudo
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+
+# AMD64 Docker as base for Cross-Compiling
+FROM ubuntu:bionic as base
+
+LABEL maintainer="AWAH-SIP@users.noreply.github.com"
+LABEL stage=qt-build-base
+
+# UID/GID injection on build if wanted
+ARG USER_UID=
+ARG USER_GID=
+
+# In case you have to build behind a proxy
+ARG PROXY=
+ENV http_proxy=$PROXY
+ENV https_proxy=$PROXY
+
+# Name of the regular user. Does not look useful but can save a bit time when changing
+ENV QT_USERNAME=qt
+
+# Needed in both builder and qt stages, so has to be defined here
+ENV QT_PREFIX=/usr/local
+
+# Install all build dependencies
+RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recommends install \
+	ca-certificates \
+	# sudo to be able to modify the container as the user, if needed.
+	sudo \
+	curl \
+	python3 \
+	gperf \
+	bison \
+	flex \
+	build-essential \
+	pkg-config \
+	libgl1-mesa-dev \
+	libicu-dev \
+	firebird-dev \
+	libpq-dev \
+    cmake \
+	# bc suggested for openssl tests
+	bc \
+	libssl-dev \
+	# git is needed to build openssl in older versions
+	git \
+	# bash needed for argument substitution in entrypoint
+	bash \
+	# since 5.14.0 we apparently need libdbus-1-dev and libnss3-dev
+	libnss3-dev \
+	libdbus-1-dev \
+    libasound2-dev \
+    alsa-utils \
+    alsa-tools \
+    alsa-base \
+    libopus-dev \
+	wget \
+	rsync \
+	subversion \
+	&& apt-get -qq clean \
+	&& rm -rf /var/lib/apt/lists/* \
+	&& printf "#!/bin/sh\nls -lah" > /usr/local/bin/ll && chmod +x /usr/local/bin/ll
+
+# Adding regular user
+RUN if [ ${USER_GID} ]; then \
+	addgroup -g ${USER_GID} ${QT_USERNAME}; \
+	else \
+	addgroup ${QT_USERNAME}; \
+	fi \
+	&& if [ ${USER_UID} ]; then \
+	useradd -u ${USER_UID} -g ${QT_USERNAME} ${QT_USERNAME}; \
+	else \
+	useradd -g ${QT_USERNAME} ${QT_USERNAME}; \
+	fi && mkdir /home/${QT_USERNAME}
+
+# make sure the user is able to sudo if needed
+RUN adduser ${QT_USERNAME} sudo
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+# build stage
+FROM base as builder
+
+LABEL stage=qt-build-builder
+
+# QT Version
+ARG QT_VERSION_MAJOR=5
+ARG QT_VERSION_MINOR=15
+ARG QT_VERSION_PATCH=2
+
+# Raspi Type
+ARG RASPI_TYPE="pi4"
+ENV RASPI_TYPE=${RASPI_TYPE}
+
+ENV QT_BUILD_ROOT=/tmp/qt_build
+
+# They switched the tarball naming scheme from 5.9 to 5.10. This ARG shall provide a possibility to reflect that
+ARG QT_TARBALL_NAMING_SCHEME=everywhere
+# Providing flag for archived or stable versions
+ARG QT_DOWNLOAD_BRANCH=official_releases
+
+ENV QT_BUILD_DIR=${QT_BUILD_ROOT}/qt-${QT_TARBALL_NAMING_SCHEME}-src-${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}/build
+
+# Copy Raspi Sysroot
+RUN wget -q https://raw.githubusercontent.com/riscv/riscv-poky/master/scripts/sysroot-relativelinks.py \
+        -O /usr/local/bin/sysroot-relativelinks.py && \
+    	chmod +x /usr/local/bin/sysroot-relativelinks.py
+
+RUN mkdir -p /sysroot/usr /sysroot/opt /sysroot/lib
+COPY --from=raspi /lib/ /sysroot/lib/
+COPY --from=raspi /usr/include/ /sysroot/usr/include/
+COPY --from=raspi /usr/lib/ /sysroot/usr/lib/
+COPY --from=raspi /opt/vc/ /sysroot/opt/vc/
+RUN ln -s /usr/bin/python3 /usr/bin/python && /usr/local/bin/sysroot-relativelinks.py /sysroot
+
+# Download Cross-Compile Tool
+WORKDIR /src
+RUN wget -q https://releases.linaro.org/components/toolchain/binaries/7.4-2019.02/arm-linux-gnueabihf/gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf.tar.xz && tar xf gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf.tar.xz && rm gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf.tar.xz
+
+# Download opt Part of RPi Firmware
+RUN svn checkout -q https://github.com/raspberrypi/firmware/trunk/opt && rsync \
+        -aP \
+        --exclude '*android*' \
+        --exclude 'hello_pi' \
+        --exclude '.svn' \
+        /src/opt/ /sysroot/opt/ && rm -r /src/opt
+
+# Installing from here
+WORKDIR ${QT_BUILD_ROOT}
+
+# Download sources
+RUN curl -sSL https://download.qt.io/${QT_DOWNLOAD_BRANCH}/qt/${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}/${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}/single/qt-${QT_TARBALL_NAMING_SCHEME}-src-${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}.tar.xz | tar xJ
+
+WORKDIR ${QT_BUILD_DIR}
+
+# Patch QT
+RUN if [ "$RASPI_TYPE" = "pi1" ]; then export DEV_TYPE="linux-rasp-pi-g++"; export PATCH_QT=true; \
+	elif [ "$RASPI_TYPE" = "pi2" ]; then export DEV_TYPE="linux-rasp-pi2-g++"; export PATCH_QT=true; \
+	elif [ "$RASPI_TYPE" = "pi3" ]; then export DEV_TYPE="linux-rasp-pi3-g++"; export PATCH_QT=true; \
+	elif [ "$RASPI_TYPE" = "pi4" ]; then export DEV_TYPE="linux-rasp-pi4-v3d-g++"; export BUILD_ARGS="-opengl es2"; \
+	else echo "Unknown device. Exiting."; exit 1; fi && \
+	if [[ -n "$PATCH_QT" ]] ; then \
+	sed -i 's/lEGL/lbrcmEGL/' "qtbase/mkspecs/devices/$DEV_TYPE/qmake.conf"; \
+	sed -i 's/lGLESv2/lbrcmGLESv2/' "qtbase/mkspecs/devices/$DEV_TYPE/qmake.conf"; \
+	sed -i 's#^VC_LIBRARY_PATH.*#VC_LIBRARY_PATH = $$[QT_SYSROOT]/opt/vc/lib#' "qtbase/mkspecs/devices/$DEV_TYPE/qmake.conf"; \
+	sed -i 's#^VC_INCLUDE_PATH.*#VC_INCLUDE_PATH = $$[QT_SYSROOT]/opt/vc/include#' "qtbase/mkspecs/devices/$DEV_TYPE/qmake.conf"; \
+	sed -i 's#^VC_LINK_LINE.*#VC_LINK_LINE = -L$${VC_LIBRARY_PATH}#' "qtbase/mkspecs/devices/$DEV_TYPE/qmake.conf"; \
+	sed -i 's#^QMAKE_LIBDIR_OPENGL_ES2.*#QMAKE_LIBDIR_OPENGL_ES2 = $${VC_LIBRARY_PATH}#' "qtbase/mkspecs/devices/$DEV_TYPE/qmake.conf"; \
+	fi && echo "Build for $RASPI_TYPE which is device $DEV_TYPE (Patched: $PATCH_QT) and with additional Args: $BUILD_ARGS" && echo $DEV_TYPE > /tmp/dev_type && echo $BUILD_ARGS > /tmp/build_args
+# Possibility to make outputs less verbose when required for a ci build
+ARG CI_BUILD=
+ENV CI_BUILD=${CI_BUILD}
+
+# Configure, make, install
+
+# ADD buildconfig/configure-${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}.sh configure.sh
+# before running the configuration, adding a directory to copy additional contents to the final image
+RUN mkdir /opt/extra-dependencies && sed -i -e 's/"-lgds"/"-lfbclient"/' ../qtbase/src/plugins/sqldrivers/configure.json && ../configure -prefix $QT_PREFIX -opensource -confirm-license -nomake examples -nomake tests -skip qtwebengine -static $(cat /tmp/build_args) -device $(cat /tmp/dev_type) -device-option CROSS_COMPILE=/src/gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf- -sysroot /sysroot
+
+# COPY buildconfig/build.sh build.sh
+# RUN ./build.sh ${CI_BUILD} ${CORE_COUNT}
+RUN make -j$(nproc)
+
+# install it
+RUN make install
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# resulting image with environment
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+FROM base as qt
+
+ENV ENTRYPOINT_DIR=/usr/local/bin
+ENV APP_BUILDDIR=/var/build
+ENV APP_SRCDIR=/var/src
+
+COPY --from=builder ${QT_PREFIX} ${QT_PREFIX}
+RUN true
+COPY --from=builder /sysroot /sysroot
+RUN true
+COPY --from=builder /src /src
+
+# the next copy statement failed often. My only guess is, that the extra dependencies are not existent and somehow that
+# triggers a failure here.... A workaround for similar issues is to put an empty run statement in between: https://github.com/moby/moby/issues/37965
+RUN true
+COPY --from=builder /opt/extra-dependencies /opt/extra-dependencies
+
+#for modifications during configuration
+ENV LD_LIBRARY_PATH=/opt/extra-dependencies/lib:${LD_LIBRARY_PATH}
+
+# the next copy statement failed often. My only guess is, that the extra dependencies are not existent and somehow that
+# triggers a failure here.... A workaround for similar issues is to put an empty run statement in between: https://github.com/moby/moby/issues/37965
+RUN true
+COPY entrypoint.sh ${ENTRYPOINT_DIR}
+
+RUN chmod +x ${ENTRYPOINT_DIR}/entrypoint.sh
+
+VOLUME ["${APP_BUILDDIR}"]
+VOLUME ["${APP_SRCDIR}"]
+
+USER ${QT_USERNAME}
+
+ENTRYPOINT ["entrypoint.sh"]
