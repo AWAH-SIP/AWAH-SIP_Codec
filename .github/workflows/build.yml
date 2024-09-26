@@ -129,3 +129,64 @@ jobs:
         with:
           name: AWAH-SIP_Codec-RPi-${{ github.sha }}
           path: build/AWAH-SIP_Codec-RPi-*
+
+  create_release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs:
+      - Linux
+      - MacOS
+      - Windows
+      - RaspberryPi
+    if: github.ref == 'refs/heads/releng' || startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Define the release name
+        id: release_name
+        run: |
+          if [ ${GITHUB_REF/refs\/tags\//} != ${GITHUB_REF} ]; then
+             echo "RELEASE_NAME=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
+          elif [ ${GITHUB_REF/refs\/heads\//} = "releng" ]; then
+             echo "RELEASE_NAME=releng" >> $GITHUB_OUTPUT
+          else
+             echo "RELEASE_NAME=${GITHUB_REF/refs\/heads\//}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download the image artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Rename Artifacts
+        run: |
+          mv AWAH-SIP_Codec_*-x86_64.AppImage AWAH-SIP_Codec_${{ steps.release_name.outputs.RELEASE_NAME }}-x86_64.AppImage
+          mv AWAH-SIP_Codec_*.dmg AWAH-SIP_Codec-Mac-${{ steps.release_name.outputs.RELEASE_NAME }}.dmg
+          mv AWAH-SIP_Codec-*.zip AWAH-SIP_Codec-Win-${{ steps.release_name.outputs.RELEASE_NAME }}.zip
+          mv AWAH-SIP_Codec-RPi-* AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}
+
+      - name: Create release with releng image
+        if: github.ref == 'refs/heads/releng'
+        uses: "marvinpinto/action-automatic-releases@v1.2.1"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          draft: true
+          title: "Prerelease"
+          files: |
+            AWAH-SIP_Codec_${{ steps.release_name.outputs.RELEASE_NAME }}-x86_64.AppImage
+            AWAH-SIP_Codec-Mac-${{ steps.release_name.outputs.RELEASE_NAME }}.dmg
+            AWAH-SIP_Codec-Win-${{ steps.release_name.outputs.RELEASE_NAME }}.zip
+            AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}
+
+      - name: Create release with release image
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: "marvinpinto/action-automatic-releases@v1.2.1"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: ${{ steps.release_name.outputs.RELEASE_NAME }}
+          prerelease: false
+          draft: true
+          title: ${{ steps.release_name.outputs.RELEASE_NAME }}
+          files: |
+            AWAH-SIP_Codec_${{ steps.release_name.outputs.RELEASE_NAME }}-x86_64.AppImage
+            AWAH-SIP_Codec-Mac-${{ steps.release_name.outputs.RELEASE_NAME }}.dmg
+            AWAH-SIP_Codec-Win-${{ steps.release_name.outputs.RELEASE_NAME }}.zip
+            AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}
