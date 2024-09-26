@@ -192,14 +192,6 @@ RUN ln -s /usr/bin/python3 /usr/bin/python && /usr/local/bin/sysroot-relativelin
 WORKDIR /src
 RUN wget -q https://releases.linaro.org/components/toolchain/binaries/7.4-2019.02/arm-linux-gnueabihf/gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf.tar.xz && tar xf gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf.tar.xz && rm gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf.tar.xz
 
-# Download opt Part of RPi Firmware
-RUN svn checkout -q https://github.com/raspberrypi/firmware/trunk/opt && rsync \
-        -aP \
-        --exclude '*android*' \
-        --exclude 'hello_pi' \
-        --exclude '.svn' \
-        /src/opt/ /sysroot/opt/ && rm -r /src/opt
-
 # Installing from here
 WORKDIR ${QT_BUILD_ROOT}
 
