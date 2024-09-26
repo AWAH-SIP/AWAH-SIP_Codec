@@ -27,7 +27,7 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: ./docker_build
           file: ./docker_build/Dockerfile_RPiBuild_Container
           platforms: linux/amd64
           push: true
