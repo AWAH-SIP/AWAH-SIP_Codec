@@ -119,7 +119,7 @@ jobs:
           registry: ghcr.io
           image: ghcr.io/awah-sip/awah-rpi-build:latest
           options: -v ${{ github.workspace }}:/var/src -v ${{ github.workspace }}/build:/var/build --privileged
-          run: entrypoint.sh build "DEFINES+=AWAH_libgpiod"
+          run: sudo entrypoint.sh build "DEFINES+=AWAH_libgpiod"
           
       - name: Rename AppImage
         run:  ls build/ && sudo mv build/AWAH-SIP_Codec build/AWAH-SIP_Codec-RPi-${{ github.sha }}
