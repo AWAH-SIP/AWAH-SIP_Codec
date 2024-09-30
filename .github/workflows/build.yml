@@ -118,7 +118,9 @@ jobs:
         with:
           registry: ghcr.io
           image: ghcr.io/awah-sip/awah-rpi-build:latest
-          options: -v ${{ github.workspace }}:/var/src -v ${{ github.workspace }}/build:/var/build --privileged
+          username: qt
+          shell: bash
+          options: -v ${{ github.workspace }}:/var/src -v ${{ github.workspace }}/build:/var/build
           run: entrypoint.sh build "DEFINES+=AWAH_libgpiod"
           
       - name: Rename AppImage
