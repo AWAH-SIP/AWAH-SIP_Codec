@@ -12,6 +12,7 @@ if [ "$1" = "build" ]; then
 	else
 		mkdir -p $APP_BUILDDIR
 		cd $APP_BUILDDIR
+		ls -la /var
 		/sysroot/usr/local/bin/qmake $ADDITIONAL_ARGS $APP_SRCDIR
 		make
 	fi
