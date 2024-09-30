@@ -260,7 +260,7 @@ ENV LD_LIBRARY_PATH=/opt/extra-dependencies/lib:${LD_LIBRARY_PATH}
 RUN true
 COPY entrypoint.sh ${ENTRYPOINT_DIR}
 
-RUN chmod +x ${ENTRYPOINT_DIR}/entrypoint.sh
+RUN chmod +x ${ENTRYPOINT_DIR}/entrypoint.sh && mkdir -p ${APP_BUILDDIR} && mkdir -p ${APP_SRCDIR} && chown ${QT_USERNAME}:${QT_USERNAME} ${APP_BUILDDIR} && chown ${QT_USERNAME}:${QT_USERNAME} ${APP_SRCDIR}
 
 VOLUME ["${APP_BUILDDIR}"]
 VOLUME ["${APP_SRCDIR}"]
