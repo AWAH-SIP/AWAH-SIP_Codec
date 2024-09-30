@@ -2,6 +2,7 @@
 
 ADDITIONAL_ARGS="${@:2}"
 
+
 if [ "$1" = "build" ]; then
 	echo "Starting to build your project..."
 	# unfortunately we have to specify the actual environment var here, because passing it in via CMD does not work with environment variables: https://docs.docker.com/engine/reference/builder/#environment-replacement
