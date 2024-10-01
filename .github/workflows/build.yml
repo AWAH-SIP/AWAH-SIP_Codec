@@ -156,6 +156,9 @@ jobs:
       - name: Download the image artifacts
         uses: actions/download-artifact@v3
 
+      - name: Display structure of downloaded files
+        run: ls -R
+
       - name: Rename Artifacts
         run: |
           mv AWAH-SIP_Codec_*-x86_64.AppImage AWAH-SIP_Codec_${{ steps.release_name.outputs.RELEASE_NAME }}-x86_64.AppImage
