@@ -151,7 +151,7 @@ jobs:
           package_root: .debpkg
           maintainer: AWAH-SIP Project <AWAH-SIP@users.noreply.github.com>
           version: ${{ steps.release_name.outputs.RELEASE_NAME }}
-          arch: 'arm64'
+          arch: 'armhf'
           depends: 'libgpiod2, libopus0 (>=1.3)'
           desc: 'The AWAH-SIP Codec is an open SIP client tailored for the needs of a broadcast facility. The project is based on PJSUA and QT. EBU TECH 3326 is considered a lot to try to reach the best interopability with existing products.'
           homepage: 'https://github.com/AWAH-SIP/AWAH-SIP_Codec'
@@ -197,7 +197,7 @@ jobs:
           mv AWAH-SIP_Codec-*-x86_64.AppImage/AWAH-SIP_Codec-*-x86_64.AppImage AWAH-SIP_Codec-${{ steps.release_name.outputs.RELEASE_NAME }}-x86_64.AppImage
           mv AWAH-SIP_Codec-*.dmg/AWAH-SIP_Codec-*.dmg AWAH-SIP_Codec-Mac-${{ steps.release_name.outputs.RELEASE_NAME }}.dmg
           mv AWAH-SIP_Codec-*.zip/AWAH-SIP_Codec-*.zip AWAH-SIP_Codec-Win-${{ steps.release_name.outputs.RELEASE_NAME }}.zip
-          mv AWAH-SIP_Codec-RPi-*.deb/AWAH-SIP_Codec-RPi-*.deb AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}_arm64.deb
+          mv AWAH-SIP_Codec-RPi-*.deb/AWAH-SIP_Codec-RPi-*.deb AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}_armhf.deb
 
       - name: Create release with releng image
         if: github.ref == 'refs/heads/releng'
@@ -212,7 +212,7 @@ jobs:
             AWAH-SIP_Codec-${{ steps.release_name.outputs.RELEASE_NAME }}-x86_64.AppImage
             AWAH-SIP_Codec-Mac-${{ steps.release_name.outputs.RELEASE_NAME }}.dmg
             AWAH-SIP_Codec-Win-${{ steps.release_name.outputs.RELEASE_NAME }}.zip
-            AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}_arm64.deb
+            AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}_armhf.deb
 
       - name: Create release with release image
         if: startsWith(github.ref, 'refs/tags/')
@@ -227,4 +227,4 @@ jobs:
             AWAH-SIP_Codec-${{ steps.release_name.outputs.RELEASE_NAME }}-x86_64.AppImage
             AWAH-SIP_Codec-Mac-${{ steps.release_name.outputs.RELEASE_NAME }}.dmg
             AWAH-SIP_Codec-Win-${{ steps.release_name.outputs.RELEASE_NAME }}.zip
-            AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}_arm64.deb
+            AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}_armhf.deb
