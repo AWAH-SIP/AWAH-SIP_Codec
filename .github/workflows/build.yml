@@ -147,7 +147,7 @@ jobs:
 
       - uses: jiro4989/build-deb-action@v3
         with:
-          package: AWAH-SIP_Codec
+          package: awah-sip-codec
           package_root: .debpkg
           maintainer: AWAH-SIP Project <AWAH-SIP@users.noreply.github.com>
           version: ${{ steps.release_name.outputs.RELEASE_NAME }}
