@@ -131,7 +131,7 @@ jobs:
           elif [ ${GITHUB_REF/refs\/heads\//} = "releng" ]; then
               echo "RELEASE_NAME=0.releng" >> $GITHUB_OUTPUT
           else
-              echo "RELEASE_NAME=0.dev_build" >> $GITHUB_OUTPUT
+              echo "RELEASE_NAME=0.dev-build" >> $GITHUB_OUTPUT
           fi
 
       - name: create Packageing Requirements
