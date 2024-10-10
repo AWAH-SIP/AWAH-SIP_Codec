@@ -139,7 +139,7 @@ jobs:
           sudo mkdir -p .debpkg/opt/AWAH-SIP_Codec
           sudo mkdir -p .debpkg/etc/systemd/system
           sudo mv build/AWAH-SIP_Codec .debpkg/opt/AWAH-SIP_Codec/AWAH-SIP_Codec
-          sudo cp packag/RPi/AWAH-SIP_Codec.service .debpkg/etc/systemd/system/AWAH-SIP_Codec.service
+          sudo cp package/RPi/AWAH-SIP_Codec.service .debpkg/etc/systemd/system/AWAH-SIP_Codec.service
           sudo chmod +x .debpkg/opt/AWAH-SIP_Codec/AWAH-SIP_Codec
           sudo mkdir -p .debpkg/DEBIAN
           sudo cp package/RPi/DEBIAN .debpkg/DEBIAN
