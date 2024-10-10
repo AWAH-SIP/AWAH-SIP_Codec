@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+
+systemctl --system daemon-reload >/dev/null || true
+if ! systemctl is-enabled AWAH-SIP_Codec >/dev/null
+then
+    systemctl enable AWAH-SIP_Codec >/dev/null || true
+    systemctl start AWAH-SIP_Codec >/dev/null || true
+else
+    systemctl restart AWAH-SIP_Codec >/dev/null || true
+fi

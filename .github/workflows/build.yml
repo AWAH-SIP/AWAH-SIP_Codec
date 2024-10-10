@@ -23,7 +23,7 @@ jobs:
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AWAH-SIP_Codec_${{ github.sha }}-x86_64.AppImage
+          name: AWAH-SIP_Codec-${{ github.sha }}-x86_64.AppImage
           path: build/AWAH-SIP_Codec-*-x86_64.AppImage
   
   MacOS:
@@ -51,16 +51,16 @@ jobs:
         run: cd build && qmake ../AWAH-SIP_Codec.pro
         
       - name: Make
-        run:  cd build && make && mv AWAH-SIP_Codec.app AWAH-SIP_Codec_${{ github.sha }}.app
+        run:  cd build && make && mv AWAH-SIP_Codec.app AWAH-SIP_Codec-${{ github.sha }}.app
         
       - name: MacDeployQT
-        run:  cd build && macdeployqt AWAH-SIP_Codec_${{ github.sha }}.app -dmg
+        run:  cd build && macdeployqt AWAH-SIP_Codec-${{ github.sha }}.app -dmg
         
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AWAH-SIP_Codec_${{ github.sha }}.dmg
-          path: build/AWAH-SIP_Codec_*.dmg
+          name: AWAH-SIP_Codec-${{ github.sha }}.dmg
+          path: build/AWAH-SIP_Codec-*.dmg
         
   Windows:
     runs-on: windows-2019
@@ -113,7 +113,7 @@ jobs:
       - name: make build directory
         run: sudo mkdir build
 
-      - name: Build AppImage in Docker
+      - name: Build Executable in Docker
         uses: addnab/docker-run-action@v3
         with:
           registry: ghcr.io
@@ -122,15 +122,48 @@ jobs:
           shell: bash
           options: -v ${{ github.workspace }}:/var/src -v ${{ github.workspace }}/build:/var/build
           run: entrypoint.sh build "DEFINES+=AWAH_libgpiod"
-          
-      - name: Rename AppImage
-        run:  ls build/ && sudo mv build/AWAH-SIP_Codec build/AWAH-SIP_Codec-RPi-${{ github.sha }}
-        
+
+      - name: Define the release name
+        id: release_name
+        run: |
+          if [ ${GITHUB_REF/refs\/tags\//} != ${GITHUB_REF} ]; then
+              echo "RELEASE_NAME=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
+          elif [ ${GITHUB_REF/refs\/heads\//} = "releng" ]; then
+              echo "RELEASE_NAME=0.releng" >> $GITHUB_OUTPUT
+          else
+              echo "RELEASE_NAME=0.dev_build" >> $GITHUB_OUTPUT
+          fi
+
+      - name: create Packageing Requirements
+        run: |
+          sudo mkdir -p .debpkg/opt/AWAH-SIP_Codec
+          sudo mkdir -p .debpkg/etc/systemd/system
+          sudo mv build/AWAH-SIP_Codec .debpkg/opt/AWAH-SIP_Codec/AWAH-SIP_Codec
+          sudo cp package/RPi/AWAH-SIP_Codec.service .debpkg/etc/systemd/system/AWAH-SIP_Codec.service
+          sudo chmod +x .debpkg/opt/AWAH-SIP_Codec/AWAH-SIP_Codec
+          sudo mkdir -p .debpkg/DEBIAN
+          sudo cp package/RPi/DEBIAN/postinst .debpkg/DEBIAN/postinst
+          sudo chmod +x .debpkg/DEBIAN/postinst
+
+      - uses: jiro4989/build-deb-action@v3
+        with:
+          package: awah-sip-codec
+          package_root: .debpkg
+          maintainer: AWAH-SIP Project <AWAH-SIP@users.noreply.github.com>
+          version: ${{ steps.release_name.outputs.RELEASE_NAME }}
+          arch: 'armhf'
+          depends: 'libgpiod2, libopus0 (>=1.3)'
+          desc: 'The AWAH-SIP Codec is an open SIP client tailored for the needs of a broadcast facility. The project is based on PJSUA and QT. EBU TECH 3326 is considered a lot to try to reach the best interopability with existing products.'
+          homepage: 'https://github.com/AWAH-SIP/AWAH-SIP_Codec'
+      
+      - name: Rename Package
+        run:  ls -la && sudo mv ./*.deb ./AWAH-SIP_Codec-RPi-${{ github.sha }}.deb
+      
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AWAH-SIP_Codec-RPi-${{ github.sha }}
-          path: build/AWAH-SIP_Codec-RPi-*
+          name: AWAH-SIP_Codec-RPi-${{ github.sha }}.deb
+          path: ./AWAH-SIP_Codec-RPi-*.deb
 
   create_release:
     name: Release
@@ -161,10 +194,10 @@ jobs:
 
       - name: Rename Artifacts
         run: |
-          mv AWAH-SIP_Codec_*-x86_64.AppImage AWAH-SIP_Codec_${{ steps.release_name.outputs.RELEASE_NAME }}-x86_64.AppImage
-          mv AWAH-SIP_Codec_*.dmg AWAH-SIP_Codec-Mac-${{ steps.release_name.outputs.RELEASE_NAME }}.dmg
-          mv AWAH-SIP_Codec-*.zip AWAH-SIP_Codec-Win-${{ steps.release_name.outputs.RELEASE_NAME }}.zip
-          mv AWAH-SIP_Codec-RPi-* AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}
+          mv AWAH-SIP_Codec-*-x86_64.AppImage/AWAH-SIP_Codec-*-x86_64.AppImage AWAH-SIP_Codec-${{ steps.release_name.outputs.RELEASE_NAME }}-x86_64.AppImage
+          mv AWAH-SIP_Codec-*.dmg/AWAH-SIP_Codec-*.dmg AWAH-SIP_Codec-Mac-${{ steps.release_name.outputs.RELEASE_NAME }}.dmg
+          mv AWAH-SIP_Codec-*.zip/AWAH-SIP_Codec-*.zip AWAH-SIP_Codec-Win-${{ steps.release_name.outputs.RELEASE_NAME }}.zip
+          mv AWAH-SIP_Codec-RPi-*.deb/AWAH-SIP_Codec-RPi-*.deb AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}_armhf.deb
 
       - name: Create release with releng image
         if: github.ref == 'refs/heads/releng'
@@ -176,10 +209,10 @@ jobs:
           draft: true
           title: "Prerelease"
           files: |
-            AWAH-SIP_Codec_${{ steps.release_name.outputs.RELEASE_NAME }}-x86_64.AppImage
+            AWAH-SIP_Codec-${{ steps.release_name.outputs.RELEASE_NAME }}-x86_64.AppImage
             AWAH-SIP_Codec-Mac-${{ steps.release_name.outputs.RELEASE_NAME }}.dmg
             AWAH-SIP_Codec-Win-${{ steps.release_name.outputs.RELEASE_NAME }}.zip
-            AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}
+            AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}_armhf.deb
 
       - name: Create release with release image
         if: startsWith(github.ref, 'refs/tags/')
@@ -191,7 +224,7 @@ jobs:
           draft: true
           title: ${{ steps.release_name.outputs.RELEASE_NAME }}
           files: |
-            AWAH-SIP_Codec_${{ steps.release_name.outputs.RELEASE_NAME }}-x86_64.AppImage
+            AWAH-SIP_Codec-${{ steps.release_name.outputs.RELEASE_NAME }}-x86_64.AppImage
             AWAH-SIP_Codec-Mac-${{ steps.release_name.outputs.RELEASE_NAME }}.dmg
             AWAH-SIP_Codec-Win-${{ steps.release_name.outputs.RELEASE_NAME }}.zip
-            AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}
+            AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}_armhf.deb
