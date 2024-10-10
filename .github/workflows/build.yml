@@ -194,10 +194,14 @@ jobs:
 
       - name: Rename Artifacts
         run: |
-          mv AWAH-SIP_Codec_*-x86_64.AppImage/AWAH-SIP_Codec_*-x86_64.AppImage AWAH-SIP_Codec_${{ steps.release_name.outputs.RELEASE_NAME }}-x86_64.AppImage
-          mv AWAH-SIP_Codec_*.dmg/AWAH-SIP_Codec_*.dmg AWAH-SIP_Codec-Mac-${{ steps.release_name.outputs.RELEASE_NAME }}.dmg
-          mv AWAH-SIP_Codec-*.zip/AWAH-SIP_Codec-*.zip AWAH-SIP_Codec-Win-${{ steps.release_name.outputs.RELEASE_NAME }}.zip
-          mv AWAH-SIP_Codec-RPi-*.deb/AWAH-SIP_Codec-RPi-*.deb AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}.deb
+          cd AWAH-SIP_Codec_*-x86_64.AppImage
+          mv AWAH-SIP_Codec_*-x86_64.AppImage ../AWAH-SIP_Codec_${{ steps.release_name.outputs.RELEASE_NAME }}-x86_64.AppImage
+          cd ../AWAH-SIP_Codec_*.dmg
+          mv AWAH-SIP_Codec_*.dmg ../AWAH-SIP_Codec-Mac-${{ steps.release_name.outputs.RELEASE_NAME }}.dmg
+          cd ../AWAH-SIP_Codec-*.zip
+          mv AWAH-SIP_Codec-*.zip ../AWAH-SIP_Codec-Win-${{ steps.release_name.outputs.RELEASE_NAME }}.zip
+          cd ../AWAH-SIP_Codec-RPi-*.deb
+          mv AWAH-SIP_Codec-RPi-*.deb ../AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}_arm64.deb
 
       - name: Create release with releng image
         if: github.ref == 'refs/heads/releng'
@@ -212,7 +216,7 @@ jobs:
             AWAH-SIP_Codec_${{ steps.release_name.outputs.RELEASE_NAME }}-x86_64.AppImage
             AWAH-SIP_Codec-Mac-${{ steps.release_name.outputs.RELEASE_NAME }}.dmg
             AWAH-SIP_Codec-Win-${{ steps.release_name.outputs.RELEASE_NAME }}.zip
-            AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}.deb
+            AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}_arm64.deb
 
       - name: Create release with release image
         if: startsWith(github.ref, 'refs/tags/')
@@ -227,4 +231,4 @@ jobs:
             AWAH-SIP_Codec_${{ steps.release_name.outputs.RELEASE_NAME }}-x86_64.AppImage
             AWAH-SIP_Codec-Mac-${{ steps.release_name.outputs.RELEASE_NAME }}.dmg
             AWAH-SIP_Codec-Win-${{ steps.release_name.outputs.RELEASE_NAME }}.zip
-            AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}.deb
+            AWAH-SIP_Codec-RPi-${{ steps.release_name.outputs.RELEASE_NAME }}_arm64.deb
