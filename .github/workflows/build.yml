@@ -142,7 +142,7 @@ jobs:
           sudo cp package/RPi/AWAH-SIP_Codec.service .debpkg/etc/systemd/system/AWAH-SIP_Codec.service
           sudo chmod +x .debpkg/opt/AWAH-SIP_Codec/AWAH-SIP_Codec
           sudo mkdir -p .debpkg/DEBIAN
-          sudo cp -r package/RPi/DEBIAN .debpkg/DEBIAN
+          sudo cp package/RPi/DEBIAN/postinst .debpkg/DEBIAN/postinst
           sudo chmod +x .debpkg/DEBIAN/postinst
 
       - uses: jiro4989/build-deb-action@v3
