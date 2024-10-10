@@ -136,14 +136,14 @@ jobs:
 
       - name: create Packageing Requirements
         run: |
-          mkdir -p .debpkg/opt/AWAH-SIP_Codec
-          mkdir -p .debpkg/etc/systemd/system
-          mv build/AWAH-SIP_Codec .debpkg/opt/AWAH-SIP_Codec/AWAH-SIP_Codec
-          cp packag/RPi/AWAH-SIP_Codec.service .debpkg/etc/systemd/system/AWAH-SIP_Codec.service
-          chmod +x .debpkg/opt/AWAH-SIP_Codec/AWAH-SIP_Codec
-          mkdir -p .debpkg/DEBIAN
-          cp package/RPi/DEBIAN .debpkg/DEBIAN
-          chmod +x .debpkg/DEBIAN/
+          sudo mkdir -p .debpkg/opt/AWAH-SIP_Codec
+          sudo mkdir -p .debpkg/etc/systemd/system
+          sudo mv build/AWAH-SIP_Codec .debpkg/opt/AWAH-SIP_Codec/AWAH-SIP_Codec
+          sudo cp packag/RPi/AWAH-SIP_Codec.service .debpkg/etc/systemd/system/AWAH-SIP_Codec.service
+          sudo chmod +x .debpkg/opt/AWAH-SIP_Codec/AWAH-SIP_Codec
+          sudo mkdir -p .debpkg/DEBIAN
+          sudo cp package/RPi/DEBIAN .debpkg/DEBIAN
+          sudo chmod +x .debpkg/DEBIAN/
 
       - uses: jiro4989/build-deb-action@v3
         with:
