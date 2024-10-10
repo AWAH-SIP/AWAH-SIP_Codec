@@ -1,0 +1,12 @@
+[Unit]
+Description=AWAH-SIP Codec
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/AWAH-SIP_Codec
+ExecStart=/opt/AWAH-SIP_Codec/AWAH-SIP_Codec
+Restart=on-abnormal
+
+[Install]
+WantedBy=multi-user.target
