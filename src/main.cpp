@@ -1,6 +1,8 @@
 #include <QCoreApplication>
 #include <QSettings>
-#include "awah-sip_library/awahsiplib.h"
+
+#include "src/AWAH-SIP_Codec_Config.h"
+#include "../awah-sip_library/include/awahsiplib.h"
 
 int main(int argc, char *argv[])
 {
@@ -10,6 +12,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("awah");
     QCoreApplication::setOrganizationDomain("awah.ch");
     QCoreApplication::setApplicationName("AWAH-Sip_Codec");
+    QCoreApplication::setApplicationVersion("AWAH_SIP_Codec_VERSION");
 
     AWAHSipLib::prepareLib();
     AWAHSipLib::instance(&a);
