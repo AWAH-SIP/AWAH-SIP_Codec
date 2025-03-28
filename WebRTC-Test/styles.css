@@ -1,0 +1,180 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.container {
+    width: 90%;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+h1, h2 {
+    color: #333;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+h2 {
+    margin-top: 25px;
+    font-size: 1.3em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="text"], select {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-right: 5px;
+    margin-top: 5px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.info-group {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.label {
+    font-weight: bold;
+    width: 100px;
+    display: inline-block;
+}
+
+.audio-controls {
+    margin-top: 20px;
+}
+
+.volume-control {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.volume-control label {
+    margin-right: 10px;
+    margin-bottom: 0;
+}
+
+#volume-slider {
+    flex-grow: 1;
+}
+
+.audio-meter {
+    margin-top: 15px;
+}
+
+.meter-bar {
+    height: 20px;
+    background-color: #e0e0e0;
+    border-radius: 3px;
+    margin-top: 5px;
+    position: relative;
+}
+
+.meter-bar::before {
+    content: '';
+    position: absolute;
+    height: 100%;
+    background-color: #4CAF50;
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.1s ease;
+}
+
+.log-container {
+    margin-top: 30px;
+}
+
+.log-entries {
+    height: 200px;
+    overflow-y: auto;
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 0.9em;
+}
+
+.log-entry {
+    margin-bottom: 5px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 2px;
+}
+
+.log-entry.info {
+    color: #0066cc;
+}
+
+.log-entry.error {
+    color: #cc0000;
+}
+
+.log-entry.success {
+    color: #007700;
+}
+
+#clear-log-btn {
+    margin-top: 10px;
+    background-color: #f44336;
+}
+
+#clear-log-btn:hover {
+    background-color: #d32f2f;
+}
+
+#mute-btn.muted {
+    background-color: #f44336;
+}
+
+.connection-settings, .session-settings, .call-info, .audio-controls {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}

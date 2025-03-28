@@ -32,13 +32,39 @@ set(PJSIP_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/pjproject-install)
 # Build and install pjproject during configuration phase
 message(STATUS "Building PJSIP at configuration time...")
 if(APPLE)
+    # Überprüfen, ob -arch bereits vorhanden ist
+    string(FIND "${CMAKE_C_FLAGS}" "-arch" C_FLAGS_HAS_ARM64)
+    string(FIND "${CMAKE_CXX_FLAGS}" "-arch" CXX_FLAGS_HAS_ARM64)
+    
     set(ARCH_FLAGS "-arch arm64")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ARCH_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARCH_FLAGS}")
+
+    # Nur hinzufügen, wenn nicht bereits vorhanden
+    if(C_FLAGS_HAS_ARM64 EQUAL -1)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ARCH_FLAGS}")
+        message(STATUS "Adding -arch arm64 to C compiler flags")
+    endif()
+    
+    if(CXX_FLAGS_HAS_ARM64 EQUAL -1)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARCH_FLAGS}")
+        message(STATUS "Adding -arch arm64 to CXX compiler flags")
+    endif()
 endif()
 # Execute the external build process for pjproject
+message(STATUS "PJSIP source directory: ${PJSIP_SOURCE_DIR}")
+message(STATUS "PJSIP install directory: ${PJSIP_INSTALL_DIR}")
 execute_process(
-    COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} CFLAGS='${CMAKE_C_FLAGS}' CXXFLAGS='${CMAKE_CXX_FLAGS}' ./configure --prefix=${PJSIP_INSTALL_DIR} --disable-video && make dep && make
+    COMMAND ./configure --prefix=${PJSIP_INSTALL_DIR} --disable-video
+    WORKING_DIRECTORY ${PJSIP_SOURCE_DIR}
+    RESULT_VARIABLE result
+    OUTPUT_VARIABLE output
+    ERROR_VARIABLE error
+)
+if(result)
+    message(FATAL_ERROR "pjproject configure failed: ${error} | ${output} | ${result}")
+else()
+    message(STATUS "pjproject configured successfully: ${output}")
+endif()
+execute_process(
     COMMAND make dep
     WORKING_DIRECTORY ${PJSIP_SOURCE_DIR}
     RESULT_VARIABLE result
@@ -46,14 +72,13 @@ execute_process(
     ERROR_VARIABLE error
 )
 if(result)
-    message(FATAL_ERROR "pjproject build failed: ${error}")
+    message(FATAL_ERROR "pjproject build dep failed: ${error}")
 else()
-    message(STATUS "pjproject built successfully: ${output}")
+    message(STATUS "pjproject built deps successfully: ${output}")
 endif()
 
 execute_process(
     COMMAND make
-    COMMAND make install
     WORKING_DIRECTORY ${PJSIP_SOURCE_DIR}
     RESULT_VARIABLE result2
     OUTPUT_VARIABLE output2
@@ -63,6 +88,19 @@ if(result2)
     message(FATAL_ERROR "pjproject build failed: ${error2}")
 else()
     message(STATUS "pjproject built successfully: ${output2}")
+endif()
+
+execute_process(
+    COMMAND make install
+    WORKING_DIRECTORY ${PJSIP_SOURCE_DIR}
+    RESULT_VARIABLE result3
+    OUTPUT_VARIABLE output3
+    ERROR_VARIABLE error3
+)
+if(result3)
+    message(FATAL_ERROR "pjproject install failed: ${error3}")
+else()
+    message(STATUS "pjproject installed successfully: ${output3}")
 endif()
 
 # Add library paths to make sure pjproject libraries are found
@@ -97,8 +135,9 @@ add_executable(AWAH_SIP_Codec
 target_link_libraries(AWAH_SIP_Codec PUBLIC
                       Qt${QT_VERSION_MAJOR}::Core
                       AWAH_SIP_Library
-                      PkgConfig::PKG_PJSIP
-                      PkgConfig::PKG_OPUS)
+                      PkgConfig::PKG_PJSIP)
+
+target_link_libraries(AWAH_SIP_Codec PRIVATE ${PKG_OPUS_STATIC_LDFLAGS})
 
 if(PKG_PJSIP_STATIC_LDFLAGS)
     # Frameworks extrahieren und separat hinzufügen
@@ -117,7 +156,21 @@ if(PKG_PJSIP_STATIC_LDFLAGS)
     target_link_libraries(AWAH_SIP_Codec PRIVATE ${OTHER_LDFLAGS} ${FRAMEWORKS})
 endif()
 
+# Erstelle ein benutzerdefinierten Target für "pjsip-clean"
+add_custom_target(pjsip-clean
+    COMMAND make clean
+    WORKING_DIRECTORY ${PJSIP_SOURCE_DIR}
+    COMMENT "Cleaning PJSIP build files"
+    VERBATIM
+)
 
+# Verbinde den Standard "clean" Target mit unserem benutzerdefinierten Target
+set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_CLEAN_FILES
+    "${PJSIP_INSTALL_DIR}"
+)
+
+# Füge einen Hinweis hinzu, wie man PJSIP manuell bereinigen kann
+message(STATUS "To clean PJSIP manually, run 'make pjsip-clean'")
 
 # add the binary tree to the search path for include files
 # so that we will find AWAH-SIP_Codec_Config.h

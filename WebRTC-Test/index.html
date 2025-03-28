@@ -1,0 +1,88 @@
+/WebRTC-Test/index.html -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWAH-SIP WebRTC Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>AWAH-SIP WebRTC Test</h1>
+        
+        <div class="connection-settings">
+            <h2>Verbindungseinstellungen</h2>
+            <div class="form-group">
+                <label for="websocket-url">Websocket URL:</label>
+                <input type="text" id="websocket-url" value="ws://localhost:8088">
+            </div>
+            <div class="form-group">
+                <label for="stun-server">STUN Server:</label>
+                <input type="text" id="stun-server" value="stun.l.google.com:19302">
+            </div>
+            <button id="connect-btn">Verbinden</button>
+        </div>
+        
+        <div class="session-settings" style="display: none;">
+            <h2>WebRTC-Sitzung</h2>
+            <div class="form-group">
+                <label for="account-id">Account ID:</label>
+                <select id="account-id"></select>
+            </div>
+            <div class="form-group">
+                <button id="create-webrtc-account-btn">WebRTC-Account erstellen</button>
+            </div>
+            <div class="form-group">
+                <label for="remote-uri">Remote URI:</label>
+                <input type="text" id="remote-uri" value="sip:webrtc@local">
+            </div>
+            <button id="create-session-btn">WebRTC-Sitzung erstellen</button>
+            <button id="end-session-btn" disabled>Sitzung beenden</button>
+        </div>
+        
+        <div class="call-info" style="display: none;">
+            <h2>Anruf-Informationen</h2>
+            <div class="info-group">
+                <span class="label">Status:</span>
+                <span id="call-status">Nicht verbunden</span>
+            </div>
+            <div class="info-group">
+                <span class="label">Call ID:</span>
+                <span id="call-id">-</span>
+            </div>
+            <div class="info-group">
+                <span class="label">ICE Status:</span>
+                <span id="ice-status">-</span>
+            </div>
+        </div>
+        
+        <div class="audio-controls" style="display: none;">
+            <h2>Audio-Steuerung</h2>
+            <div class="form-group">
+                <label for="audio-source">Audio-Quelle:</label>
+                <select id="audio-source"></select>
+            </div>
+            <div class="form-group">
+                <button id="mute-btn">Stumm</button>
+                <div class="volume-control">
+                    <label for="volume-slider">Lautstärke:</label>
+                    <input type="range" id="volume-slider" min="0" max="100" value="100">
+                </div>
+            </div>
+            <div class="audio-meter">
+                <div id="meter-label">Eingangspegel:</div>
+                <div id="meter-value" class="meter-bar"></div>
+            </div>
+        </div>
+        
+        <div class="log-container">
+            <h2>Log</h2>
+            <div id="log-entries" class="log-entries"></div>
+            <button id="clear-log-btn">Log löschen</button>
+        </div>
+    </div>
+    
+    <script src="webrtc-client.js"></script>
+</body>
+</html>
