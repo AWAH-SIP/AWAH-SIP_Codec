@@ -49,6 +49,18 @@ if(APPLE)
         message(STATUS "Adding -arch arm64 to CXX compiler flags")
     endif()
 endif()
+# Check for Opus!
+find_package(PkgConfig REQUIRED)
+pkg_search_module(OPUS REQUIRED opus)
+# Debug-Ausgabe der gefundenen Informationen
+message(STATUS "Opus include dirs: ${OPUS_INCLUDE_DIRS}")
+message(STATUS "Opus library dirs: ${OPUS_LIBRARY_DIRS}")
+message(STATUS "Opus libraries: ${OPUS_LIBRARIES}")
+message(STATUS "Opus Cflags: ${OPUS_CFLAGS}")
+message(STATUS "Opus Cflags (other): ${OPUS_CFLAGS_OTHER}")
+message(STATUS "Opus Ldflags: ${OPUS_LDFLAGS}")
+message(STATUS "Opus Ldflags (other): ${OPUS_LDFLAGS_OTHER}")
+
 # Execute the external build process for pjproject
 message(STATUS "PJSIP source directory: ${PJSIP_SOURCE_DIR}")
 message(STATUS "PJSIP install directory: ${PJSIP_INSTALL_DIR}")
