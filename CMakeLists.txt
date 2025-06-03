@@ -69,10 +69,19 @@ string(REPLACE ";" " " OPUS_LDFLAGS_STR "-L${OPUS_LIBRARY_DIRS}")
 string(REPLACE ";" " -l" OPUS_LIBS_STR "-l${OPUS_LIBRARIES}")
 set(ENV{LDFLAGS} "${OPUS_LDFLAGS_STR} ${OPUS_LIBS_STR}")
 
-# Falls nötig, PKG_CONFIG_PATH setzen (falls nicht automatisch dabei)
-if(OPUS_LIBRARY_DIRS)
-  set(ENV{PKG_CONFIG_PATH} "${OPUS_LIBRARY_DIRS}/pkgconfig")
-endif()
+# Setze PKG_CONFIG_PATH auf Basis der gefundenen Library-Pfade
+foreach(dir IN LISTS OPUS_LIBRARY_DIRS)
+    list(APPEND _pkgconfig_paths "${dir}/pkgconfig")
+endforeach()
+
+# Baue den Pfad-String mit Doppelpunkten (Unix)
+list(JOIN _pkgconfig_paths ":" OPUS_PKGCONFIG_PATH)
+
+# Debug-Ausgabe
+message(STATUS "Dynamisch gesetzter OPUS_PKGCONFIG_PATH: ${OPUS_PKGCONFIG_PATH}")
+
+# Setze als ENV-Variable
+set(ENV{PKG_CONFIG_PATH} "${OPUS_PKGCONFIG_PATH}")
 
 # Execute the external build process for pjproject
 message(STATUS "PJSIP source directory: ${PJSIP_SOURCE_DIR}")
