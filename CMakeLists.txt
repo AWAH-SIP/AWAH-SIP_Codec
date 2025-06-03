@@ -49,17 +49,30 @@ if(APPLE)
         message(STATUS "Adding -arch arm64 to CXX compiler flags")
     endif()
 endif()
-# Check for Opus!
+# Finde Opus via pkg-config
 find_package(PkgConfig REQUIRED)
 pkg_search_module(OPUS REQUIRED opus)
-# Debug-Ausgabe der gefundenen Informationen
+
+# Ausgabe zur Kontrolle
 message(STATUS "Opus include dirs: ${OPUS_INCLUDE_DIRS}")
 message(STATUS "Opus library dirs: ${OPUS_LIBRARY_DIRS}")
 message(STATUS "Opus libraries: ${OPUS_LIBRARIES}")
-message(STATUS "Opus Cflags: ${OPUS_CFLAGS}")
-message(STATUS "Opus Cflags (other): ${OPUS_CFLAGS_OTHER}")
-message(STATUS "Opus Ldflags: ${OPUS_LDFLAGS}")
-message(STATUS "Opus Ldflags (other): ${OPUS_LDFLAGS_OTHER}")
+message(STATUS "Opus pkgconfig path: ${OPUS_PKGCONFIG_PATH}")  # manchmal leer
+
+# Setze Umgebungsvariablen für ./configure auf Basis der gefundenen Werte
+# CFLAGS: -I für jeden Include-Pfad
+string(REPLACE ";" " " OPUS_CFLAGS_STR "-I${OPUS_INCLUDE_DIRS}")
+set(ENV{CFLAGS} "${OPUS_CFLAGS_STR}")
+
+# LDFLAGS: -L für jeden Library-Pfad + -l für jede Library
+string(REPLACE ";" " " OPUS_LDFLAGS_STR "-L${OPUS_LIBRARY_DIRS}")
+string(REPLACE ";" " -l" OPUS_LIBS_STR "-l${OPUS_LIBRARIES}")
+set(ENV{LDFLAGS} "${OPUS_LDFLAGS_STR} ${OPUS_LIBS_STR}")
+
+# Falls nötig, PKG_CONFIG_PATH setzen (falls nicht automatisch dabei)
+if(OPUS_LIBRARY_DIRS)
+  set(ENV{PKG_CONFIG_PATH} "${OPUS_LIBRARY_DIRS}/pkgconfig")
+endif()
 
 # Execute the external build process for pjproject
 message(STATUS "PJSIP source directory: ${PJSIP_SOURCE_DIR}")
