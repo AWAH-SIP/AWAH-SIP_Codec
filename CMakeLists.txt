@@ -49,41 +49,85 @@ if(APPLE)
         message(STATUS "Adding -arch arm64 to CXX compiler flags")
     endif()
 endif()
-# Finde Opus via pkg-config
+# # Finde Opus via pkg-config
+# find_package(PkgConfig REQUIRED)
+# pkg_search_module(OPUS REQUIRED opus)
+
+# # Ausgabe zur Kontrolle
+# message(STATUS "Opus include dirs: ${OPUS_INCLUDE_DIRS}")
+# message(STATUS "Opus library dirs: ${OPUS_LIBRARY_DIRS}")
+# message(STATUS "Opus libraries: ${OPUS_LIBRARIES}")
+# message(STATUS "Opus pkgconfig path: ${OPUS_PKGCONFIG_PATH}")  # manchmal leer
+
+# # Setze Umgebungsvariablen für ./configure auf Basis der gefundenen Werte
+# # CFLAGS: -I für jeden Include-Pfad
+# #string(REPLACE ";" " " OPUS_CFLAGS_STR "-I${OPUS_INCLUDE_DIRS}")
+# set(OPUS_CFLAGS_STR "-I/opt/homebrew/Cellar/opus/1.5.2/include")
+
+# set(ENV{CFLAGS} "${OPUS_CFLAGS_STR}")
+
+# # LDFLAGS: -L für jeden Library-Pfad + -l für jede Library
+# string(REPLACE ";" " " OPUS_LDFLAGS_STR "-L${OPUS_LIBRARY_DIRS}")
+# string(REPLACE ";" " -l" OPUS_LIBS_STR "-l${OPUS_LIBRARIES}")
+# set(ENV{LDFLAGS} "${OPUS_LDFLAGS_STR} ${OPUS_LIBS_STR}")
+
+# # Setze PKG_CONFIG_PATH auf Basis der gefundenen Library-Pfade
+# foreach(dir IN LISTS OPUS_LIBRARY_DIRS)
+#     list(APPEND _pkgconfig_paths "${dir}/pkgconfig")
+# endforeach()
+
+# # Baue den Pfad-String mit Doppelpunkten (Unix)
+# list(JOIN _pkgconfig_paths ":" OPUS_PKGCONFIG_PATH)
+
+# # Debug-Ausgabe
+# message(STATUS "Dynamisch gesetzter OPUS_PKGCONFIG_PATH: ${OPUS_PKGCONFIG_PATH}")
+
+# # Setze als ENV-Variable
+# set(ENV{PKG_CONFIG_PATH} "${OPUS_PKGCONFIG_PATH}")
+
+# Execute the external build process for pjproject
+
+
+#  -----  AI generated -------------> please review!!!!!!!!!!!!!!
+
+# --- Opus via pkg-config ---
 find_package(PkgConfig REQUIRED)
 pkg_search_module(OPUS REQUIRED opus)
 
-# Ausgabe zur Kontrolle
-message(STATUS "Opus include dirs: ${OPUS_INCLUDE_DIRS}")
-message(STATUS "Opus library dirs: ${OPUS_LIBRARY_DIRS}")
-message(STATUS "Opus libraries: ${OPUS_LIBRARIES}")
-message(STATUS "Opus pkgconfig path: ${OPUS_PKGCONFIG_PATH}")  # manchmal leer
+message(STATUS "Raw Opus include dirs: ${OPUS_INCLUDE_DIRS}")
+message(STATUS "Raw Opus library dirs: ${OPUS_LIBRARY_DIRS}")
+message(STATUS "Raw Opus libraries: ${OPUS_LIBRARIES}")
 
-# Setze Umgebungsvariablen für ./configure auf Basis der gefundenen Werte
-# CFLAGS: -I für jeden Include-Pfad
-string(REPLACE ";" " " OPUS_CFLAGS_STR "-I${OPUS_INCLUDE_DIRS}")
-set(ENV{CFLAGS} "${OPUS_CFLAGS_STR}")
+# Fix include paths that end with /opus
+set(OPUS_FIXED_INCLUDE_DIRS "")
+foreach(dir IN LISTS OPUS_INCLUDE_DIRS)
+    string(REGEX REPLACE "/opus/?$" "" cleaned "${dir}")
+    list(APPEND OPUS_FIXED_INCLUDE_DIRS "${cleaned}")
+endforeach()
+message(STATUS "Sanitized Opus include dirs: ${OPUS_FIXED_INCLUDE_DIRS}")
 
-# LDFLAGS: -L für jeden Library-Pfad + -l für jede Library
-string(REPLACE ";" " " OPUS_LDFLAGS_STR "-L${OPUS_LIBRARY_DIRS}")
+# Set env vars for PJSIP ./configure
+string(REPLACE ";" " -I" OPUS_CFLAGS_STR "-I${OPUS_FIXED_INCLUDE_DIRS}")
+string(REPLACE ";" " -L" OPUS_LDFLAGS_STR "-L${OPUS_LIBRARY_DIRS}")
 string(REPLACE ";" " -l" OPUS_LIBS_STR "-l${OPUS_LIBRARIES}")
+
+set(ENV{CFLAGS} "${OPUS_CFLAGS_STR}")
 set(ENV{LDFLAGS} "${OPUS_LDFLAGS_STR} ${OPUS_LIBS_STR}")
 
-# Setze PKG_CONFIG_PATH auf Basis der gefundenen Library-Pfade
+# Dynamically build PKG_CONFIG_PATH
+set(OPUS_PKGCONFIG_PATH "")
 foreach(dir IN LISTS OPUS_LIBRARY_DIRS)
-    list(APPEND _pkgconfig_paths "${dir}/pkgconfig")
+    list(APPEND OPUS_PKGCONFIG_PATH "${dir}/pkgconfig")
 endforeach()
-
-# Baue den Pfad-String mit Doppelpunkten (Unix)
-list(JOIN _pkgconfig_paths ":" OPUS_PKGCONFIG_PATH)
-
-# Debug-Ausgabe
-message(STATUS "Dynamisch gesetzter OPUS_PKGCONFIG_PATH: ${OPUS_PKGCONFIG_PATH}")
-
-# Setze als ENV-Variable
+list(JOIN OPUS_PKGCONFIG_PATH ":" OPUS_PKGCONFIG_PATH)
 set(ENV{PKG_CONFIG_PATH} "${OPUS_PKGCONFIG_PATH}")
 
-# Execute the external build process for pjproject
+message(STATUS "Final ENV CFLAGS: $ENV{CFLAGS}")
+message(STATUS "Final ENV LDFLAGS: $ENV{LDFLAGS}")
+message(STATUS "Final ENV PKG_CONFIG_PATH: $ENV{PKG_CONFIG_PATH}")
+
+#  ----- end of AI generated -------------------------------------------
+
 message(STATUS "PJSIP source directory: ${PJSIP_SOURCE_DIR}")
 message(STATUS "PJSIP install directory: ${PJSIP_INSTALL_DIR}")
 execute_process(
