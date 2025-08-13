@@ -1,88 +1,148 @@
-/WebRTC-Test/index.html -->
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AWAH-SIP WebRTC Test</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AWAH-SIP WebRTC Test</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <div class="container">
-        <h1>AWAH-SIP WebRTC Test</h1>
-        
-        <div class="connection-settings">
-            <h2>Verbindungseinstellungen</h2>
-            <div class="form-group">
-                <label for="websocket-url">Websocket URL:</label>
-                <input type="text" id="websocket-url" value="ws://localhost:8088">
-            </div>
-            <div class="form-group">
-                <label for="stun-server">STUN Server:</label>
-                <input type="text" id="stun-server" value="stun.l.google.com:19302">
-            </div>
-            <button id="connect-btn">Verbinden</button>
-        </div>
-        
-        <div class="session-settings" style="display: none;">
-            <h2>WebRTC-Sitzung</h2>
-            <div class="form-group">
-                <label for="account-id">Account ID:</label>
-                <select id="account-id"></select>
-            </div>
-            <div class="form-group">
-                <button id="create-webrtc-account-btn">WebRTC-Account erstellen</button>
-            </div>
-            <div class="form-group">
-                <label for="remote-uri">Remote URI:</label>
-                <input type="text" id="remote-uri" value="sip:webrtc@local">
-            </div>
-            <button id="create-session-btn">WebRTC-Sitzung erstellen</button>
-            <button id="end-session-btn" disabled>Sitzung beenden</button>
-        </div>
-        
-        <div class="call-info" style="display: none;">
-            <h2>Anruf-Informationen</h2>
-            <div class="info-group">
-                <span class="label">Status:</span>
-                <span id="call-status">Nicht verbunden</span>
-            </div>
-            <div class="info-group">
-                <span class="label">Call ID:</span>
-                <span id="call-id">-</span>
-            </div>
-            <div class="info-group">
-                <span class="label">ICE Status:</span>
-                <span id="ice-status">-</span>
-            </div>
-        </div>
-        
-        <div class="audio-controls" style="display: none;">
-            <h2>Audio-Steuerung</h2>
-            <div class="form-group">
-                <label for="audio-source">Audio-Quelle:</label>
-                <select id="audio-source"></select>
-            </div>
-            <div class="form-group">
-                <button id="mute-btn">Stumm</button>
-                <div class="volume-control">
-                    <label for="volume-slider">Lautstärke:</label>
-                    <input type="range" id="volume-slider" min="0" max="100" value="100">
-                </div>
-            </div>
-            <div class="audio-meter">
-                <div id="meter-label">Eingangspegel:</div>
-                <div id="meter-value" class="meter-bar"></div>
-            </div>
-        </div>
-        
-        <div class="log-container">
-            <h2>Log</h2>
-            <div id="log-entries" class="log-entries"></div>
-            <button id="clear-log-btn">Log löschen</button>
-        </div>
+  <header class="app-header">
+    <div class="top-left"><h1>AWAH-SIP WebRTC Test</h1></div>
+    <div class="top-status">
+      <div id="wsStatus" class="status-pill">WS: disconnected</div>
+      <div id="topSignaling" class="status-pill">Signaling: -</div>
+      <div id="topIce" class="status-pill">ICE: -</div>
+      <div id="topDtls" class="status-pill">DTLS: -</div>
+      <div id="topConn" class="status-pill">PC: -</div>
     </div>
-    
-    <script src="webrtc-client.js"></script>
+  </header>
+
+  <main class="container">
+    <section class="card span-2">
+      <h2>Connection</h2>
+      <div class="row">
+        <label for="wsUrl">WebSocket URL</label>
+        <input id="wsUrl" type="text" value="ws://127.0.0.1:2924" />
+        <button id="btnConnect" class="primary">Connect</button>
+        <button id="btnDisconnect" disabled>Disconnect</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>WebRTC Channel</h2>
+      <div class="row">
+        <label for="channelId">Channel ID</label>
+        <input id="channelId" type="text" value="browser-client" />
+      </div>
+      <div class="row">
+        <label for="channelDesc">Description</label>
+        <input id="channelDesc" type="text" value="Browser WebRTC Client" />
+      </div>
+      <div class="row">
+        <label><input id="chkSendOnly" type="checkbox" /> Send only (codec ➜ browser)</label>
+      </div>
+      <div class="row">
+        <label for="maxCalls">Max calls</label>
+        <input id="maxCalls" type="number" value="5" min="1" max="32" />
+      </div>
+      <div class="row">
+        <label for="stunServer">STUN</label>
+        <input id="stunServer" type="text" value="stun:stun.l.google.com:19302" />
+      </div>
+      <div class="row">
+        <label for="turnServer">TURN</label>
+        <input id="turnServer" type="text" placeholder="turn:host:3478" />
+      </div>
+      <div class="row">
+        <label for="turnUser">TURN user</label>
+        <input id="turnUser" type="text" />
+      </div>
+      <div class="row">
+        <label for="turnPass">TURN password</label>
+        <input id="turnPass" type="text" />
+      </div>
+      <div class="row">
+        <button id="btnCreateCh">Create</button>
+        <button id="btnModifyCh">Modify</button>
+        <button id="btnRemoveCh">Remove</button>
+        <button id="btnListCh">List Channels</button>
+      </div>
+      <pre id="channelsOut" class="pre small"></pre>
+    </section>
+
+    <section class="card">
+      <h2>WebRTC Session</h2>
+      <div class="row">
+        <label for="channelSelect">Connect to channel</label>
+        <select id="channelSelect"></select>
+        <button id="btnListCh" title="Refresh channels">↻</button>
+      </div>
+      <div class="row">
+        <button id="btnStart" class="primary">Start WebRTC</button>
+        <button id="btnStop" disabled>Stop WebRTC</button>
+        <div id="rtcState" class="status-pill muted">not started</div>
+      </div>
+      <div class="row">
+        <audio id="remoteAudio" controls autoplay></audio>
+      </div>
+    </section>
+
+    <section class="card span-2">
+      <h2>Connection Info</h2>
+      <div class="grid two">
+        <div>
+          <ul class="kv">
+            <li><strong>Signaling</strong> <span id="sSignaling">-</span></li>
+            <li><strong>ICE</strong> <span id="sIce">-</span></li>
+            <li><strong>DTLS</strong> <span id="sDtls">-</span></li>
+            <li><strong>PC State</strong> <span id="sConn">-</span></li>
+          </ul>
+        </div>
+        <div>
+          <ul class="kv">
+            <li><strong>Selected Pair</strong> <span id="sPair">-</span></li>
+            <li><strong>Local Cand</strong> <span id="sLocalCand">-</span></li>
+            <li><strong>Remote Cand</strong> <span id="sRemoteCand">-</span></li>
+            <li><strong>Bytes</strong> <span id="sBytes">0 / 0</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="row">
+        <label for="statusChannelSelect">Status for channel</label>
+        <select id="statusChannelSelect"></select>
+      </div>
+      <div class="row">
+        <button id="btnGetStatus">Query Server Status</button>
+      </div>
+      <div id="srvStatusView"></div>
+      <pre id="srvStatusOut" class="pre small"></pre>
+    </section>
+
+    <section class="card span-2">
+      <details>
+        <summary>SDP (debug)</summary>
+        <div class="grid two">
+          <div>
+            <h3>Local Offer</h3>
+            <pre id="localSdp" class="pre"></pre>
+          </div>
+          <div>
+            <h3>Remote Answer</h3>
+            <pre id="remoteSdp" class="pre"></pre>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section class="card span-2">
+      <details>
+        <summary>Logs</summary>
+        <pre id="logOut" class="pre"></pre>
+      </details>
+    </section>
+  </main>
+
+  <script src="webrtc-client.js"></script>
 </body>
 </html>

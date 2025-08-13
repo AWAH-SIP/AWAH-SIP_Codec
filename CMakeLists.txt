@@ -1,5 +1,16 @@
 cmake_minimum_required(VERSION 3.16)
+
+# Ensure macOS deployment target is set early so it affects all targets and flags
+if(APPLE)
+  if(NOT DEFINED CMAKE_OSX_DEPLOYMENT_TARGET)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "15.0" CACHE STRING "macOS deployment target" FORCE)
+  endif()
+  set(ENV{MACOSX_DEPLOYMENT_TARGET} "${CMAKE_OSX_DEPLOYMENT_TARGET}")
+endif()
+
 project(AWAH_SIP_Codec LANGUAGES CXX VERSION 3.3.0)
+
+# Set macOS deployment target to match pjproject prebuilt objects to avoid linker warnings
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -28,6 +39,16 @@ find_package(Qt6Core5Compat REQUIRED)
 
 set(PJSIP_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/awah-sip_library/third-party/pjproject)
 set(PJSIP_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/pjproject-install)
+
+# OpenSSL is required for DTLS-SRTP (WebRTC) support in pjproject
+find_package(OpenSSL REQUIRED)
+# Determine correct OpenSSL root and lib dir
+get_filename_component(OPENSSL_ROOT_DIR "${OPENSSL_INCLUDE_DIR}" DIRECTORY)
+list(GET OPENSSL_LIBRARIES 0 _OPENSSL_ANY_LIB)
+get_filename_component(OPENSSL_LIB_DIR "${_OPENSSL_ANY_LIB}" DIRECTORY)
+message(STATUS "OpenSSL include: ${OPENSSL_INCLUDE_DIR}")
+message(STATUS "OpenSSL libs: ${OPENSSL_LIBRARIES}")
+message(STATUS "OpenSSL root: ${OPENSSL_ROOT_DIR}")
 
 # Build and install pjproject during configuration phase
 message(STATUS "Building PJSIP at configuration time...")
@@ -83,11 +104,18 @@ message(STATUS "Dynamisch gesetzter OPUS_PKGCONFIG_PATH: ${OPUS_PKGCONFIG_PATH}"
 # Setze als ENV-Variable
 set(ENV{PKG_CONFIG_PATH} "${OPUS_PKGCONFIG_PATH}")
 
+# Export OpenSSL locations so pjproject's configure can find libs
+set(ENV{OPENSSL_PREFIX} "${OPENSSL_ROOT_DIR}")
+set(ENV{OPENSSL_INCLUDE_DIR} "${OPENSSL_INCLUDE_DIR}")
+set(ENV{OPENSSL_LIB_DIR} "${OPENSSL_LIB_DIR}")
+set(ENV{CFLAGS} "$ENV{CFLAGS} -I${OPENSSL_INCLUDE_DIR}")
+set(ENV{LDFLAGS} "$ENV{LDFLAGS} -L${OPENSSL_LIB_DIR} -lssl -lcrypto")
+
 # Execute the external build process for pjproject
 message(STATUS "PJSIP source directory: ${PJSIP_SOURCE_DIR}")
 message(STATUS "PJSIP install directory: ${PJSIP_INSTALL_DIR}")
 execute_process(
-    COMMAND ./configure --prefix=${PJSIP_INSTALL_DIR} --disable-video
+    COMMAND ./configure --prefix=${PJSIP_INSTALL_DIR} --disable-video --with-ssl=${OPENSSL_ROOT_DIR}
     WORKING_DIRECTORY ${PJSIP_SOURCE_DIR}
     RESULT_VARIABLE result
     OUTPUT_VARIABLE output
@@ -171,6 +199,9 @@ target_link_libraries(AWAH_SIP_Codec PUBLIC
                       AWAH_SIP_Library
                       PkgConfig::PKG_PJSIP)
 
+# Ensure OpenSSL is available to the final link, since pjproject static libs may require it
+target_link_libraries(AWAH_SIP_Codec PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+
 target_link_libraries(AWAH_SIP_Codec PRIVATE ${PKG_OPUS_STATIC_LDFLAGS})
 
 if(PKG_PJSIP_STATIC_LDFLAGS)
@@ -186,6 +217,11 @@ if(PKG_PJSIP_STATIC_LDFLAGS)
         endif()
     endforeach()
 
+    # Filter out OpenSSL flags from pkg-config; we link via OpenSSL::SSL/Crypto
+    if(OTHER_LDFLAGS)
+        list(FILTER OTHER_LDFLAGS EXCLUDE REGEX "^-lssl$")
+        list(FILTER OTHER_LDFLAGS EXCLUDE REGEX "^-lcrypto$")
+    endif()
     # Füge die anderen Flags und Frameworks hinzu
     target_link_libraries(AWAH_SIP_Codec PRIVATE ${OTHER_LDFLAGS} ${FRAMEWORKS})
 endif()
