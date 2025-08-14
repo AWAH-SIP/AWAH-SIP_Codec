@@ -298,13 +298,13 @@
     if (!id) return;
     const exists = Array.from(els.channelSelect.options).some(o => o.value === id);
     if (exists) { log('channel: id already exists'); return; }
-    send('createWebRTCChannel', { id, description: els.channelDesc.value, enabled: true, sendOnly: !!els.chkSendOnly?.checked, maxConcurrentCalls: parseInt(els.maxCalls?.value||'5',10), stunServer: els.stunServer?.value, turnServer: els.turnServer?.value, turnUsername: els.turnUser?.value, turnCredential: els.turnPass?.value }, 'create_channel');
+    send('createWebRTCChannel', { id, description: els.channelDesc.value, enabled: true, sendOnly: !!els.chkSendOnly?.checked, maxConcurrentStreams: parseInt(els.maxCalls?.value||'5',10), stunServer: els.stunServer?.value, turnServer: els.turnServer?.value, turnUsername: els.turnUser?.value, turnCredential: els.turnPass?.value }, 'create_channel');
   };
   if (els.btnModifyCh) {
     els.btnModifyCh.onclick = () => {
       const id = els.channelId.value.trim() || els.channelSelect.value;
       if (!id) return;
-      send('modifyWebRTCChannel', { id, description: els.channelDesc.value, enabled: true, sendOnly: !!els.chkSendOnly?.checked, maxConcurrentCalls: parseInt(els.maxCalls?.value||'5',10), stunServer: els.stunServer?.value, turnServer: els.turnServer?.value, turnUsername: els.turnUser?.value, turnCredential: els.turnPass?.value }, 'modify_channel');
+      send('modifyWebRTCChannel', { id, description: els.channelDesc.value, enabled: true, sendOnly: !!els.chkSendOnly?.checked, maxConcurrentStreams: parseInt(els.maxCalls?.value||'5',10), stunServer: els.stunServer?.value, turnServer: els.turnServer?.value, turnUsername: els.turnUser?.value, turnCredential: els.turnPass?.value }, 'modify_channel');
     };
   }
   els.btnRemoveCh.onclick = () => {
@@ -324,7 +324,7 @@
     els.channelId.value = ch.id;
     els.channelDesc.value = ch.description || '';
     if (els.chkSendOnly) els.chkSendOnly.checked = !!ch.sendOnly;
-    if (els.maxCalls) els.maxCalls.value = ch.maxConcurrentCalls ?? 5;
+    if (els.maxCalls) els.maxCalls.value = ch.maxConcurrentStreams ?? 5;
     if (els.stunServer) els.stunServer.value = ch.stunServer || '';
     if (els.turnServer) els.turnServer.value = ch.turnServer || '';
     if (els.turnUser) els.turnUser.value = ch.turnUsername || '';
