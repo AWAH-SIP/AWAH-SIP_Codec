@@ -250,7 +250,13 @@
     ws.onmessage = (ev) => {
       try {
         const m = JSON.parse(ev.data);
-        if (m.command === 'createWebRTCChannel') { log('channel: created'); send('getWebRTCChannels', {}, 'list_channels'); return; }
+        if (m.command === 'createWebRTCChannel') { 
+          const newId = m.data && m.data.id ? m.data.id : '';
+          log(`channel: created${newId ? ` (id: ${newId})` : ''}`);
+          if (newId) { els.channelId.value = newId; }
+          send('getWebRTCChannels', {}, 'list_channels'); 
+          return; 
+        }
         if (m.command === 'modifyWebRTCChannel') { log('channel: modified'); send('getWebRTCChannels', {}, 'list_channels'); return; }
         if (m.command === 'removeWebRTCChannel') { log('channel: removed'); send('getWebRTCChannels', {}, 'list_channels'); return; }
         if (m.command === 'getWebRTCChannels') {
@@ -292,24 +298,22 @@
   };
   els.btnDisconnect.onclick = () => { if (ws) ws.close(); };
 
-  // Prevent duplicate channel IDs
+  // Create channel: server generates UID; client-provided id is ignored
   els.btnCreateCh.onclick = () => {
-    const id = els.channelId.value.trim();
-    if (!id) return;
-    const exists = Array.from(els.channelSelect.options).some(o => o.value === id);
-    if (exists) { log('channel: id already exists'); return; }
-    send('createWebRTCChannel', { id, description: els.channelDesc.value, enabled: true, sendOnly: !!els.chkSendOnly?.checked, maxConcurrentStreams: parseInt(els.maxCalls?.value||'5',10), stunServer: els.stunServer?.value, turnServer: els.turnServer?.value, turnUsername: els.turnUser?.value, turnCredential: els.turnPass?.value }, 'create_channel');
+    const description = els.channelDesc.value.trim();
+    if (!description) { log('channel: description required'); return; }
+    send('createWebRTCChannel', { description, enabled: true, sendOnly: !!els.chkSendOnly?.checked, maxConcurrentStreams: parseInt(els.maxCalls?.value||'5',10), stunServer: els.stunServer?.value, turnServer: els.turnServer?.value, turnUsername: els.turnUser?.value, turnCredential: els.turnPass?.value }, 'create_channel');
   };
   if (els.btnModifyCh) {
     els.btnModifyCh.onclick = () => {
-      const id = els.channelId.value.trim() || els.channelSelect.value;
-      if (!id) return;
+      const id = els.channelSelect.value || els.channelId.value.trim();
+      if (!id) { log('modify: select a channel'); return; }
       send('modifyWebRTCChannel', { id, description: els.channelDesc.value, enabled: true, sendOnly: !!els.chkSendOnly?.checked, maxConcurrentStreams: parseInt(els.maxCalls?.value||'5',10), stunServer: els.stunServer?.value, turnServer: els.turnServer?.value, turnUsername: els.turnUser?.value, turnCredential: els.turnPass?.value }, 'modify_channel');
     };
   }
   els.btnRemoveCh.onclick = () => {
-    const id = els.channelId.value.trim() || els.channelSelect.value;
-    if (!id) return;
+    const id = els.channelSelect.value || els.channelId.value.trim();
+    if (!id) { log('remove: select a channel'); return; }
     send('removeWebRTCChannel', { id }, 'remove_channel');
   };
   els.btnListCh.onclick = () => {
@@ -419,8 +423,7 @@
       renderKV(sec, [
         ['ID', data.channel.id],
         ['Description', data.channel.description],
-        ['Enabled', String(data.channel.enabled)],
-        ['Splitter slot', String(data.channel.splitterSlot)]
+        ['Enabled', String(data.channel.enabled)]
       ]);
       root.appendChild(sec);
     }
@@ -435,11 +438,8 @@
       const title = document.createElement('h3'); title.textContent = `Session ${s.sessionId}`; card.appendChild(title);
       renderKV(card, [
         ['Active', String(s.isActive)],
-        ['Conf slot', String(s.confSlot)],
-        ['Splitter slot', String(s.splitterSlot)],
         ['ICE ready', String(s.iceReady)],
         ['SRTP ready', String(s.srtpReady)],
-        ['Master wired', String(s.masterWired)],
         ['Pending ICE', String(s.pendingIceCandidatesCount)]
       ]);
       if (s.media && s.media.codec) {
