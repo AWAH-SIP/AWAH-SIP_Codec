@@ -363,7 +363,7 @@
             noiseSuppression: false,
             autoGainControl: false
           },
-          video: false
+            video: false
         });
         localStream = stream;
         const track = stream.getAudioTracks()[0];
