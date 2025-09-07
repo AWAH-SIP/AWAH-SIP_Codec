@@ -25,6 +25,7 @@
     btnStop: document.getElementById('btnStop'),
     rtcState: document.getElementById('rtcState'),
     remoteAudio: document.getElementById('remoteAudio'),
+    chkLoopbackBrowser: document.getElementById('chkLoopbackBrowser'),
 
     sSignaling: document.getElementById('sSignaling'),
     sIce: document.getElementById('sIce'),
@@ -52,6 +53,10 @@
   let ws = null;
   let pc = null;
   let localStream = null;
+  let loopbackCtx = null;
+  let loopbackDest = null;
+  let loopbackSource = null;
+  let loopbackTrackSender = null;
   let sessionId = null;
   let reqId = 1;
   let bytesTx = 0, bytesRx = 0;
@@ -188,6 +193,22 @@
     pc.ontrack = (ev) => {
       if (ev.streams && ev.streams[0]) {
         els.remoteAudio.srcObject = ev.streams[0];
+        if (els.chkLoopbackBrowser && els.chkLoopbackBrowser.checked) {
+          try {
+            if (!loopbackCtx) loopbackCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (!loopbackDest) loopbackDest = loopbackCtx.createMediaStreamDestination();
+            if (loopbackSource) { try { loopbackSource.disconnect(); } catch {}
+              loopbackSource = null; }
+            loopbackSource = loopbackCtx.createMediaStreamSource(ev.streams[0]);
+            loopbackSource.connect(loopbackDest);
+            const ms = loopbackDest.stream;
+            const tr = ms.getAudioTracks()[0];
+            if (tr) {
+              if (loopbackTrackSender) { try { pc.removeTrack(loopbackTrackSender); } catch {} loopbackTrackSender = null; }
+              loopbackTrackSender = pc.addTrack(tr, ms);
+            }
+          } catch (e) { log('loopback init failed: ' + e); }
+        }
       }
     };
   }
@@ -376,6 +397,13 @@
         log('mic permission failed: ' + e);
       }
     }
+    // If loopback requested before tracks arrive, pre-allocate a dummy dest and add track when ontrack fires
+    if (els.chkLoopbackBrowser && els.chkLoopbackBrowser.checked) {
+      try {
+        if (!loopbackCtx) loopbackCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (!loopbackDest) loopbackDest = loopbackCtx.createMediaStreamDestination();
+      } catch {}
+    }
     const offer = await pc.createOffer();
     let sdp = offer.sdp || '';
     sdp = mungeOpusStereo(sdp, 128000);
@@ -393,6 +421,34 @@
     els.btnStart.disabled = false;
     els.btnStop.disabled = true;
   };
+
+  if (els.chkLoopbackBrowser) {
+    els.chkLoopbackBrowser.onchange = () => {
+      if (!pc) return;
+      try {
+        if (els.chkLoopbackBrowser.checked) {
+          // enable: if remote is already set, wire now
+          const s = els.remoteAudio && els.remoteAudio.srcObject;
+          if (s) {
+            if (!loopbackCtx) loopbackCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (!loopbackDest) loopbackDest = loopbackCtx.createMediaStreamDestination();
+            if (loopbackSource) { try { loopbackSource.disconnect(); } catch {} loopbackSource = null; }
+            loopbackSource = loopbackCtx.createMediaStreamSource(s);
+            loopbackSource.connect(loopbackDest);
+            const ms = loopbackDest.stream; const tr = ms.getAudioTracks()[0];
+            if (tr) { if (loopbackTrackSender) { try { pc.removeTrack(loopbackTrackSender); } catch {} }
+              loopbackTrackSender = pc.addTrack(tr, ms);
+            }
+          }
+        } else {
+          // disable
+          if (loopbackTrackSender) { try { pc.removeTrack(loopbackTrackSender); } catch {} loopbackTrackSender = null; }
+          if (loopbackSource) { try { loopbackSource.disconnect(); } catch {} loopbackSource = null; }
+          if (loopbackDest) { /* keep context/dest around */ }
+        }
+      } catch (e) { log('loopback toggle error: ' + e); }
+    };
+  }
 
   els.btnGetStatus.onclick = () => {
     const selected = (els.statusChannelSelect && els.statusChannelSelect.value) || els.channelSelect.value || els.channelId.value.trim();
